@@ -1,3 +1,15 @@
+# Doğru Disiplin uygulaması
+
+- Kullanıcı Türkçe konuşur; arayüz metinleri Türkçe, kod adları Türkçe (mevcut stile uy).
+- Marka: Gece + Volt (#14181F / #F2F2EE / #C8F031), Anton + Inter. Sadece koyu tema.
+- Karakter çizgi adam DEĞİL: Reels'teki marka karakteri (dağınık koyu kahve saç, yüzsüz, çıplak gövde, gri şort + siyah tayt, beyaz ayakkabı, volt bileklik). Bütün görseller GPT (gpt-image-2) ile bu karakterden çizilir; referans `assets/images/karakter-sayfa.png`, tarifler `~/Desktop/dogrudisiplin-gorseller/uygulama/ham/`.
+- Seri sıfırlanmaz: toplam gün + haftalık hedef; her alışkanlığın "küçük hâli" de sayılır.
+- Sesli anons şimdilik expo-speech (tr-TR); Oğuz'un ElevenLabs kayıtları gelince cümle başına MP3 (expo-audio), `src/lib/ses.ts` arayüzü aynı kalır.
+- Oğuz geri bildirimi (2026-11-22): Anton başlıklarda Türkçe işaretler kesilmesin → `Baslik` satır yüksekliği ≥1.3×; büyük harf için her zaman `trBuyuk` (textTransform/toUpperCase "DAKIKA" yazar). Geri sayım halkası Reanimated ile UI thread'de akar; saniyede bir JS güncellemesiyle çizme.
+- GPT hareket çizimi: 2. kare için 1. kareyi referans vermek çoğu zaman aynı resmi üretir (özellikle yandan bacak değişimi). Çözüm: iki pozu tek 1536×768 resimde yan yana çizdir (`<id>-cift.txt`), `sips -c 768 768 --cropOffset 0 0|768` ile böl. Yandan iki bacak ayırt edilemez; zıt faz yerine "diz yukarı ↔ iki ayak yerde" gibi net fark seç.
+- Hakkında/Ayarlar ekranında "Powered by Nüve Dijital" (nuvedigital.com) kalır.
+- Ürün notları ve kararlar: nüve kasası `knowledge/concepts/dogrudisiplin-uygulama-rakip-analizi.md`.
+
 This is an Expo/React Native mobile application. Prioritize mobile-first patterns, performance, and cross-platform compatibility.
 
 ## Expo has changed — do not trust your training data

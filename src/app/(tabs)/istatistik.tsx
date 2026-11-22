@@ -1,0 +1,93 @@
+import { router } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
+
+import { KiloGrafik } from '@/components/kilo-grafik';
+import { Baslik, Bolum, Dugme, Ekran, Kart, M } from '@/components/ui';
+import { Bosluk, Kose, Renk } from '@/constants/theme';
+import { sonGunler } from '@/lib/tarih';
+import { useVeri } from '@/store';
+
+export default function Istatistik() {
+  const antrenmanlar = useVeri((s) => s.antrenmanlar);
+  const aliskanliklar = useVeri((s) => s.aliskanliklar);
+  const isaretler = useVeri((s) => s.isaretler);
+  const kilolar = useVeri((s) => s.kilolar);
+  const hedefKg = useVeri((s) => s.hedefKg);
+
+  const gunler = new Set(antrenmanlar.map((a) => a.tarih));
+  const toplamSinav = antrenmanlar.reduce((t, a) => t + a.sinav, 0);
+  const toplamDakika = Math.round(antrenmanlar.reduce((t, a) => t + a.sureSn, 0) / 60);
+
+  // Son 30 gün alışkanlık oranı: yapılan işaret / (alışkanlık × gün)
+  const son30 = sonGunler(30);
+  const olasi = aliskanliklar.reduce((t, a) => t + son30.filter((g) => g >= a.olusturma).length, 0);
+  const yapilan = aliskanliklar.reduce((t, a) => t + son30.filter((g) => isaretler[g]?.[a.id]).length, 0);
+  const oran = olasi ? Math.round((yapilan / olasi) * 100) : 0;
+
+  const sonKilo = kilolar.at(-1);
+  const haftaOnce = kilolar.filter((k) => k.tarih <= sonGunler(8)[0]).at(-1);
+  const haftalikFark = sonKilo && haftaOnce ? sonKilo.kg - haftaOnce.kg : undefined;
+
+  return (
+    <Ekran>
+      <Baslik metin="İSTATİSTİK" boyut={40} />
+
+      <View style={st.izgara}>
+        <Sayi deger={gunler.size} etiket="antrenman günü" />
+        <Sayi deger={toplamSinav} etiket="toplam şınav" />
+        <Sayi deger={`%${oran}`} etiket="alışkanlık (30 gün)" />
+        <Sayi deger={toplamDakika} etiket="dakika" />
+      </View>
+
+      <Bolum baslik="Son 30 gün">
+        <Kart>
+          <View style={st.takvim}>
+            {son30.map((g) => (
+              <View key={g} style={[st.gun, gunler.has(g) && { backgroundColor: Renk.volt }]} />
+            ))}
+          </View>
+          <M tur="kucuk">Volt kareler antrenman yaptığın günler.</M>
+        </Kart>
+      </Bolum>
+
+      <Bolum baslik="Kilo">
+        <Kart>
+          {sonKilo ? (
+            <>
+              <View style={st.kiloUst}>
+                <Baslik metin={`${sonKilo.kg.toFixed(1)} KG`} boyut={32} />
+                {haftalikFark !== undefined ? (
+                  <M tur="kucuk" renk={Renk.volt}>
+                    {haftalikFark > 0 ? '+' : ''}
+                    {haftalikFark.toFixed(1)} kg / hafta
+                  </M>
+                ) : null}
+              </View>
+              <KiloGrafik kayitlar={kilolar} hedef={hedefKg} />
+            </>
+          ) : (
+            <M tur="normal">Kilonu haftada bir, aynı saatte tart. Günlük oynamalar normaldir; çizginin yönüne bak.</M>
+          )}
+          <Dugme metin="Kilo gir" tur="ikincil" onPress={() => router.push('/kilo')} />
+        </Kart>
+      </Bolum>
+    </Ekran>
+  );
+}
+
+function Sayi({ deger, etiket }: { deger: number | string; etiket: string }) {
+  return (
+    <View style={st.sayi}>
+      <Baslik metin={String(deger)} boyut={34} />
+      <M tur="kucuk">{etiket}</M>
+    </View>
+  );
+}
+
+const st = StyleSheet.create({
+  izgara: { flexDirection: 'row', flexWrap: 'wrap', gap: Bosluk.m },
+  sayi: { width: '47.5%', flexGrow: 1, backgroundColor: Renk.gece2, borderRadius: Kose.m, padding: Bosluk.l, gap: 2 },
+  takvim: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  gun: { width: 26, height: 26, borderRadius: 6, backgroundColor: Renk.gece3 },
+  kiloUst: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
+});
