@@ -1,14 +1,16 @@
+import { useRenk } from '@/lib/tema';
 import { NativeTabs } from 'expo-router/native-tabs';
 
-import { Renk } from '@/constants/theme';
+
 
 export default function Sekmeler() {
+  const Renk = useRenk();
   return (
     <NativeTabs
       backgroundColor={Renk.gece}
       indicatorColor={Renk.gece3}
-      tintColor={Renk.volt}
-      labelStyle={{ selected: { color: Renk.volt } }}>
+      tintColor={Renk.vurgu}
+      labelStyle={{ selected: { color: Renk.vurgu } }}>
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Label>Bugün</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf={{ default: 'sun.max', selected: 'sun.max.fill' }} md="today" />

@@ -1,17 +1,20 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Bolum, Dugme, Kart, M } from '@/components/ui';
-import { Bosluk, Kose, Renk, Yazi } from '@/constants/theme';
+import { Bosluk, Kose, Yazi } from '@/constants/theme';
 import { PAKETLER } from '@/data/aliskanlik-paketleri';
 import { basari } from '@/lib/ses';
 import { useVeri } from '@/store';
+import { stil, useRenk } from '@/lib/tema';
 
 const SIMGELER = ['💪', '📖', '💧', '📵', '🧘', '🏃', '🛏️', '✍️', '🥗', '🚫', '🔥', '👟'];
 
 export default function AliskanlikEkle() {
+  const Renk = useRenk();
+  const st = useSt();
   const ins = useSafeAreaInsets();
   const ekle = useVeri((s) => s.aliskanlikEkle);
   const mevcut = useVeri((s) => s.aliskanliklar);
@@ -71,7 +74,7 @@ export default function AliskanlikEkle() {
           <View style={st.hedefler}>
             {[3, 4, 5, 6, 7].map((n) => (
               <Pressable key={n} onPress={() => setHedef(n)} style={[st.hedef, hedef === n && st.hedefSecili]}>
-                <Text style={[st.hedefYazi, hedef === n && { color: Renk.gece }]}>{n}</Text>
+                <Text style={[st.hedefYazi, hedef === n && { color: Renk.voltUstu }]}>{n}</Text>
               </Pressable>
             ))}
           </View>
@@ -97,7 +100,7 @@ export default function AliskanlikEkle() {
   );
 }
 
-const st = StyleSheet.create({
+const useSt = stil((Renk) => ({
   girdi: {
     backgroundColor: Renk.gece2,
     borderRadius: Kose.m,
@@ -121,4 +124,4 @@ const st = StyleSheet.create({
   hedef: { width: 36, height: 36, borderRadius: 18, backgroundColor: Renk.gece2, alignItems: 'center', justifyContent: 'center' },
   hedefSecili: { backgroundColor: Renk.volt },
   hedefYazi: { fontFamily: Yazi.kalin, color: Renk.kemik, fontSize: 14 },
-});
+}));

@@ -1,11 +1,12 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { TextInput, View } from 'react-native';
 
 import { Dugme, M } from '@/components/ui';
-import { Bosluk, Kose, Renk, Yazi } from '@/constants/theme';
+import { Bosluk, Kose, Yazi } from '@/constants/theme';
 import { basari } from '@/lib/ses';
 import { useVeri } from '@/store';
+import { stil, useRenk } from '@/lib/tema';
 
 const sayiyaCevir = (s: string) => {
   const n = Number(s.replace(',', '.'));
@@ -13,6 +14,8 @@ const sayiyaCevir = (s: string) => {
 };
 
 export default function Kilo() {
+  const Renk = useRenk();
+  const st = useSt();
   const sonKilo = useVeri((s) => s.kilolar.at(-1)?.kg);
   const hedefKg = useVeri((s) => s.hedefKg);
   const kiloEkle = useVeri((s) => s.kiloEkle);
@@ -58,7 +61,7 @@ export default function Kilo() {
   );
 }
 
-const st = StyleSheet.create({
+const useSt = stil((Renk) => ({
   ekran: { flex: 1, backgroundColor: Renk.gece, padding: Bosluk.l, gap: Bosluk.m },
   girdi: {
     backgroundColor: Renk.gece2,
@@ -68,4 +71,4 @@ const st = StyleSheet.create({
     fontFamily: Yazi.baslik,
     fontSize: 34,
   },
-});
+}));

@@ -3,7 +3,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import Animated, { cancelAnimation, Easing, useAnimatedProps, useSharedValue, withTiming } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
 
-import { Renk, Yazi } from '@/constants/theme';
+import { Yazi } from '@/constants/theme';
+import { stil, useRenk } from '@/lib/tema';
 
 const AnimCircle = Animated.createAnimatedComponent(Circle);
 
@@ -18,7 +19,7 @@ export function Halka({
   oynuyor,
   anahtar,
   boyut = 240,
-  renk = Renk.volt,
+  renk,
   alt,
 }: {
   kalan: number;
@@ -29,6 +30,11 @@ export function Halka({
   renk?: string;
   alt?: string;
 }) {
+  const Renk = useRenk();
+  const st = useSt();
+  const cizgiRenk = renk ?? Renk.volt;
+  // Volt açık zeminde yazı olarak okunmaz: sayı için vurgu rengi.
+  const sayiRenk = cizgiRenk === Renk.volt ? Renk.vurgu : cizgiRenk;
   const kalinlik = 10;
   const r = (boyut - kalinlik) / 2;
   const cevre = 2 * Math.PI * r;
@@ -54,7 +60,7 @@ export function Halka({
           cx={boyut / 2}
           cy={boyut / 2}
           r={r}
-          stroke={renk}
+          stroke={cizgiRenk}
           strokeWidth={kalinlik}
           strokeLinecap="round"
           fill="none"
@@ -63,13 +69,13 @@ export function Halka({
           transform={`rotate(-90 ${boyut / 2} ${boyut / 2})`}
         />
       </Svg>
-      <Text style={[st.sayi, { fontSize: boyut * 0.38, lineHeight: boyut * 0.52, color: renk }]}>{Math.ceil(kalan)}</Text>
+      <Text style={[st.sayi, { fontSize: boyut * 0.38, lineHeight: boyut * 0.52, color: sayiRenk }]}>{Math.ceil(kalan)}</Text>
       {alt ? <Text style={st.alt}>{alt}</Text> : null}
     </View>
   );
 }
 
-const st = StyleSheet.create({
+const useSt = stil((Renk) => ({
   sayi: { fontFamily: Yazi.baslik, textAlign: 'center' },
   alt: { fontFamily: Yazi.kalin, color: Renk.soluk, fontSize: 12, letterSpacing: 1.2, marginTop: -6 },
-});
+}));

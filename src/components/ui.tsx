@@ -2,7 +2,6 @@ import type { ReactNode } from 'react';
 import {
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   View,
   type PressableProps,
@@ -13,10 +12,12 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Bosluk, Kose, Renk, Yazi } from '@/constants/theme';
+import { Bosluk, Kose, Yazi } from '@/constants/theme';
 import { trBuyuk } from '@/lib/metin';
+import { stil, useRenk } from '@/lib/tema';
 
 export function Ekran({ children, kaydir = true }: { children: ReactNode; kaydir?: boolean }) {
+  const s = useS();
   const ins = useSafeAreaInsets();
   const ic = { paddingTop: ins.top + Bosluk.m, paddingBottom: ins.bottom + 100, paddingHorizontal: Bosluk.l };
   if (!kaydir) return <View style={[s.ekran, ic]}>{children}</View>;
@@ -29,6 +30,7 @@ export function Ekran({ children, kaydir = true }: { children: ReactNode; kaydir
 
 type MetinTur = 'buyuk' | 'normal' | 'kucuk' | 'etiket';
 export function M({ tur = 'normal', renk, style, children, ...p }: TextProps & { tur?: MetinTur; renk?: string }) {
+  const s = useS();
   // Etiketler Türkçe kurala göre büyütülür (textTransform "KENDI" yazar).
   const icerik =
     tur === 'etiket'
@@ -57,10 +59,12 @@ export function Baslik({
   boyut?: number;
   style?: StyleProp<TextStyle>;
 }) {
+  const Renk = useRenk();
+  const s = useS();
   return (
     <Text style={[s.baslik, { fontSize: boyut, lineHeight: Math.round(boyut * 1.22), letterSpacing: boyut >= 26 ? -0.5 : -0.2 }, style]}>
       {metin}
-      {vurgu ? <Text style={{ color: Renk.volt }}> {vurgu}</Text> : null}
+      {vurgu ? <Text style={{ color: Renk.vurgu }}> {vurgu}</Text> : null}
     </Text>
   );
 }
@@ -69,7 +73,7 @@ export function Baslik({
 export function Sayi({
   deger,
   boyut = 40,
-  renk = Renk.volt,
+  renk,
   style,
 }: {
   deger: string | number;
@@ -77,10 +81,15 @@ export function Sayi({
   renk?: string;
   style?: StyleProp<TextStyle>;
 }) {
-  return <Text style={[s.sayi, { fontSize: boyut, lineHeight: Math.round(boyut * 1.25), color: renk }, style]}>{deger}</Text>;
+  const Renk = useRenk();
+  const s = useS();
+  // Volt açık zeminde yazı olarak okunmaz: volt istenirse vurgu rengi kullanılır.
+  const r = !renk || renk === Renk.volt ? Renk.vurgu : renk;
+  return <Text style={[s.sayi, { fontSize: boyut, lineHeight: Math.round(boyut * 1.25), color: r }, style]}>{deger}</Text>;
 }
 
 export function Kart({ children, style, vurgulu }: { children: ReactNode; style?: StyleProp<ViewStyle>; vurgulu?: boolean }) {
+  const s = useS();
   return <View style={[s.kart, vurgulu && s.kartVurgu, style]}>{children}</View>;
 }
 
@@ -90,6 +99,8 @@ export function Dugme({
   style,
   ...p
 }: PressableProps & { metin: string; tur?: 'ana' | 'ikincil' | 'tehlike'; style?: StyleProp<ViewStyle> }) {
+  const Renk = useRenk();
+  const s = useS();
   return (
     <Pressable
       accessibilityRole="button"
@@ -108,6 +119,7 @@ export function Dugme({
 }
 
 export function Bolum({ baslik, sag, children }: { baslik: string; sag?: ReactNode; children: ReactNode }) {
+  const s = useS();
   return (
     <View style={{ gap: Bosluk.m }}>
       <View style={s.bolumUst}>
@@ -120,6 +132,8 @@ export function Bolum({ baslik, sag, children }: { baslik: string; sag?: ReactNo
 }
 
 export function Cubuk({ oran, yukseklik = 5 }: { oran: number; yukseklik?: number }) {
+  const Renk = useRenk();
+  const s = useS();
   return (
     <View style={[s.cubuk, { height: yukseklik }]}>
       <View style={{ width: `${Math.max(0, Math.min(1, oran)) * 100}%`, height: '100%', backgroundColor: Renk.volt, borderRadius: 3 }} />
@@ -146,6 +160,8 @@ export function IsaretKare({
   gelecek?: boolean;
   tikli?: boolean;
 }) {
+  const Renk = useRenk();
+  const s = useS();
   const L = boyut * 1.5;
   const merkez = boyut / 2 - L / (2 * Math.SQRT2);
   return (
@@ -176,7 +192,7 @@ export function IsaretKare({
   );
 }
 
-const s = StyleSheet.create({
+const useS = stil((Renk) => ({
   ekran: { flex: 1, backgroundColor: Renk.gece },
   baslik: { fontFamily: Yazi.kalin, color: Renk.kemik },
   sayi: { fontFamily: Yazi.baslik, letterSpacing: 0.5, includeFontPadding: false },
@@ -195,9 +211,9 @@ const s = StyleSheet.create({
   },
   dugmeIkincil: { backgroundColor: Renk.gece3 },
   dugmeTehlike: { backgroundColor: 'transparent', borderWidth: 1, borderColor: Renk.kirmizi },
-  dugmeYazi: { fontFamily: Yazi.kalin, color: Renk.gece, fontSize: 16 },
+  dugmeYazi: { fontFamily: Yazi.kalin, color: Renk.voltUstu, fontSize: 16 },
   bolumUst: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   cubuk: { backgroundColor: Renk.gece3, borderRadius: 3, overflow: 'hidden' },
   kare: { borderWidth: 1.5, borderColor: Renk.pasif, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
-  tik: { color: Renk.gece, fontFamily: Yazi.kalin },
-});
+  tik: { color: Renk.voltUstu, fontFamily: Yazi.kalin },
+}));

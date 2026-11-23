@@ -1,10 +1,11 @@
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { kapakGorseli, Karo } from '@/components/hareket-gorseli';
 import { Baslik, Bolum, Ekran, M, Sayi } from '@/components/ui';
-import { Bosluk, Kose, Renk, Yazi } from '@/constants/theme';
+import { Bosluk, Kose, Yazi } from '@/constants/theme';
 import { PROGRAMLAR, type Program } from '@/data/programlar';
+import { stil, useRenk } from '@/lib/tema';
 
 const GRUPLAR: { tur: Program['tur']; baslik: string }[] = [
   { tur: 'kisa', baslik: 'Birlikte yap' },
@@ -28,6 +29,8 @@ export default function Programlar() {
 }
 
 function ProgramKarti({ p }: { p: Program }) {
+  const Renk = useRenk();
+  const st = useSt();
   const kapak = p.kapak ? kapakGorseli(p.kapak) : undefined;
   return (
     <Pressable
@@ -50,7 +53,7 @@ function ProgramKarti({ p }: { p: Program }) {
         <View style={st.etiketler}>
           <M style={st.etiket}>{p.sure}</M>
           <M style={st.etiket}>{p.seviye}</M>
-          {p.yakinda ? <M style={[st.etiket, { color: Renk.gece, backgroundColor: Renk.volt }]}>Yakında</M> : null}
+          {p.yakinda ? <M style={[st.etiket, { color: Renk.voltUstu, backgroundColor: Renk.volt }]}>Yakında</M> : null}
         </View>
       </View>
       <M tur="buyuk" renk={Renk.soluk}>
@@ -60,7 +63,7 @@ function ProgramKarti({ p }: { p: Program }) {
   );
 }
 
-const st = StyleSheet.create({
+const useSt = stil((Renk) => ({
   kart: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -91,4 +94,4 @@ const st = StyleSheet.create({
     borderRadius: 999,
     overflow: 'hidden',
   },
-});
+}));

@@ -1,13 +1,14 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 
 import { HareketGorseli, kapakGorseli, Karo, kasGorseli } from '@/components/hareket-gorseli';
 import { Baslik, Bolum, Cubuk, Dugme, Ekran, Kart, M, Sayi } from '@/components/ui';
-import { Bosluk, Renk, Yazi } from '@/constants/theme';
+import { Bosluk, Yazi } from '@/constants/theme';
 import { programBul, type Program } from '@/data/programlar';
 import { basari } from '@/lib/ses';
 import { useVeri, uzunBugun } from '@/store';
+import { stil, useRenk } from '@/lib/tema';
 
 export default function ProgramDetay() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -22,9 +23,10 @@ export default function ProgramDetay() {
 }
 
 function Ust({ p }: { p: Program }) {
+  const Renk = useRenk();
   return (
     <View style={{ gap: 4 }}>
-      <M tur="etiket" renk={Renk.volt}>
+      <M tur="etiket" renk={Renk.vurgu}>
         {p.sure} · {p.seviye}
       </M>
       <Baslik metin={p.ad} boyut={32} />
@@ -36,6 +38,8 @@ function Ust({ p }: { p: Program }) {
 }
 
 function KisaProgram({ p }: { p: Program }) {
+  const Renk = useRenk();
+  const st = useSt();
   const s = p.seans!;
   return (
     <Ekran>
@@ -63,6 +67,8 @@ function KisaProgram({ p }: { p: Program }) {
 }
 
 function UzunProgram({ p }: { p: Program }) {
+  const Renk = useRenk();
+  const st = useSt();
   const il = useVeri((s) => s.uzun[p.id]);
   const basla = useVeri((s) => s.uzunBasla);
   const kaydet = useVeri((s) => s.uzunGunKaydet);
@@ -113,7 +119,7 @@ function UzunProgram({ p }: { p: Program }) {
         </Kart>
       ) : (
         <Kart vurgulu={!bugunYapildi}>
-          <M tur="etiket" renk={Renk.volt}>
+          <M tur="etiket" renk={Renk.vurgu}>
             Gün {bugunNo} / {gunler.length}
           </M>
           {bugun.dinlenme ? (
@@ -165,8 +171,8 @@ function UzunProgram({ p }: { p: Program }) {
                   yapilan !== undefined && { backgroundColor: Renk.volt },
                   bugunMu && yapilan === undefined && { borderColor: Renk.volt, borderWidth: 2 },
                 ]}>
-                <Text style={[st.gunNo, yapilan !== undefined && { color: Renk.gece }]}>{g.gun}</Text>
-                <Text style={[st.gunHedef, yapilan !== undefined && { color: Renk.gece }]}>
+                <Text style={[st.gunNo, yapilan !== undefined && { color: Renk.voltUstu }]}>{g.gun}</Text>
+                <Text style={[st.gunHedef, yapilan !== undefined && { color: Renk.voltUstu }]}>
                   {g.dinlenme ? 'dinlen' : (yapilan ?? g.hedef)}
                 </Text>
               </View>
@@ -192,6 +198,7 @@ function UzunProgram({ p }: { p: Program }) {
 }
 
 function SayacDugme({ metin, onPress }: { metin: string; onPress: () => void }) {
+  const st = useSt();
   return (
     <Pressable onPress={onPress} style={st.sayacDugme} hitSlop={6}>
       <Text style={st.sayacDugmeYazi}>{metin}</Text>
@@ -200,6 +207,8 @@ function SayacDugme({ metin, onPress }: { metin: string; onPress: () => void }) 
 }
 
 function Rehber({ p }: { p: Program }) {
+  const Renk = useRenk();
+  const st = useSt();
   const [acik, setAcik] = useState(0);
   return (
     <Ekran>
@@ -221,7 +230,7 @@ function Rehber({ p }: { p: Program }) {
   );
 }
 
-const st = StyleSheet.create({
+const useSt = stil((Renk) => ({
   hareket: { flexDirection: 'row', alignItems: 'center', gap: Bosluk.m },
   gorseller: { flexDirection: 'row', gap: Bosluk.m, justifyContent: 'center' },
   sayac: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Bosluk.xl, marginVertical: Bosluk.s },
@@ -239,4 +248,4 @@ const st = StyleSheet.create({
   },
   gunNo: { fontFamily: Yazi.kalin, color: Renk.soluk, fontSize: 11 },
   gunHedef: { fontFamily: Yazi.baslik, color: Renk.kemik, fontSize: 16, lineHeight: 22 },
-});
+}));

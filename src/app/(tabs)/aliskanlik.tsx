@@ -1,13 +1,15 @@
 import { router } from 'expo-router';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 
 import { Baslik, Dugme, Ekran, IsaretKare, Kart, M, Sayi } from '@/components/ui';
-import { Bosluk, Renk, Yazi } from '@/constants/theme';
+import { Bosluk, Yazi } from '@/constants/theme';
 import { tik } from '@/lib/ses';
 import { buHafta, gunAnahtari, KISA_GUNLER } from '@/lib/tarih';
 import { toplamGun, useVeri, type Aliskanlik } from '@/store';
+import { stil, useRenk } from '@/lib/tema';
 
 export default function Aliskanliklar() {
+  const st = useSt();
   const aliskanliklar = useVeri((s) => s.aliskanliklar);
 
   return (
@@ -42,6 +44,8 @@ export default function Aliskanliklar() {
 }
 
 function HaftaKarti({ a }: { a: Aliskanlik }) {
+  const Renk = useRenk();
+  const st = useSt();
   const isaretler = useVeri((s) => s.isaretler);
   const isaretle = useVeri((s) => s.isaretle);
   const sil = useVeri((s) => s.aliskanlikSil);
@@ -91,12 +95,12 @@ function HaftaKarti({ a }: { a: Aliskanlik }) {
               }}
               style={st.gun}>
               <IsaretKare durum={isaret} boyut={36} kose={10} bugun={g === bugun} gelecek={gelecek} />
-              <Text style={[st.gunAd, g === bugun && { color: Renk.volt }]}>{KISA_GUNLER[i]}</Text>
+              <Text style={[st.gunAd, g === bugun && { color: Renk.vurgu }]}>{KISA_GUNLER[i]}</Text>
             </Pressable>
           );
         })}
       </View>
-      <M tur="kucuk" renk={hedefTamam ? Renk.volt : Renk.soluk}>
+      <M tur="kucuk" renk={hedefTamam ? Renk.vurgu : Renk.soluk}>
         Bu hafta {buHaftaYapilan}/{a.haftalikHedef}
         {hedefTamam ? ' · hedef tamam ✓' : ''}
       </M>
@@ -104,14 +108,14 @@ function HaftaKarti({ a }: { a: Aliskanlik }) {
   );
 }
 
-const st = StyleSheet.create({
+const useSt = stil((Renk) => ({
   ust: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   ekle: { width: 40, height: 40, borderRadius: 20, backgroundColor: Renk.volt, alignItems: 'center', justifyContent: 'center' },
-  ekleYazi: { fontFamily: Yazi.kalin, color: Renk.gece, fontSize: 24, lineHeight: 28 },
+  ekleYazi: { fontFamily: Yazi.kalin, color: Renk.voltUstu, fontSize: 24, lineHeight: 28 },
   aciklama: { gap: 6, marginTop: -Bosluk.s },
   aciklamaSatir: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   baslikSatir: { flexDirection: 'row', alignItems: 'center', gap: Bosluk.m },
   hafta: { flexDirection: 'row', justifyContent: 'space-between' },
   gun: { alignItems: 'center', gap: 6 },
   gunAd: { fontFamily: Yazi.orta, fontSize: 11, color: Renk.soluk },
-});
+}));

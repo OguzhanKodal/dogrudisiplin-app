@@ -2,16 +2,17 @@
 import { useKeepAwake } from 'expo-keep-awake';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Halka } from '@/components/halka';
 import { HareketGorseli, Karo, kasGorseli } from '@/components/hareket-gorseli';
 import { Baslik, Dugme, M, Sayi } from '@/components/ui';
-import { Bosluk, Renk, Yazi } from '@/constants/theme';
+import { Bosluk, Yazi } from '@/constants/theme';
 import { programBul, type Hareket } from '@/data/programlar';
 import { basari, konus, sus, tik } from '@/lib/ses';
 import { useVeri } from '@/store';
+import { stil, useRenk } from '@/lib/tema';
 
 type Adim =
   | { tur: 'giris'; sure: number }
@@ -31,6 +32,8 @@ function adimlariKur(hareketler: Hareket[], giris: string, dinlenme: number): Ad
 }
 
 export default function Oynatici() {
+  const Renk = useRenk();
+  const st = useSt();
   useKeepAwake();
   const ins = useSafeAreaInsets();
   const { width: en, height: boy } = useWindowDimensions();
@@ -176,7 +179,7 @@ export default function Oynatici() {
       <View style={st.baslik}>
         <Sayi deger={`0${hareketNo + 1}`} boyut={58} renk={calisiyor ? Renk.volt : Renk.pasif} />
         <View style={{ flex: 1, paddingBottom: 10 }}>
-          <M tur="etiket" renk={calisiyor ? Renk.volt : Renk.soluk}>
+          <M tur="etiket" renk={calisiyor ? Renk.vurgu : Renk.soluk}>
             {`${etiket} · ${hareketNo + 1} / ${seans.hareketler.length}`}
           </M>
           <Baslik metin={hareket.ad} boyut={hareket.ad.length > 18 ? 22 : 28} />
@@ -220,7 +223,7 @@ export default function Oynatici() {
           </Pressable>
           <Kontrol simge="⏭" etiket="Atla" onPress={() => git(adimNo + 1)} />
         </View>
-        <M tur="kucuk" renk={!siradaki && calisiyor ? Renk.volt : Renk.soluk}>
+        <M tur="kucuk" renk={!siradaki && calisiyor ? Renk.vurgu : Renk.soluk}>
           {siradaki ? `Sıradaki: ${siradaki.ad}` : calisiyor ? 'Son hareket, bırakma!' : duraklatildi ? 'Devam için halkaya dokun' : 'Durdurmak için halkaya dokun'}
         </M>
       </View>
@@ -229,6 +232,7 @@ export default function Oynatici() {
 }
 
 function Kontrol({ simge, etiket, onPress }: { simge: string; etiket: string; onPress: () => void }) {
+  const st = useSt();
   return (
     <Pressable onPress={onPress} style={st.kontrol} accessibilityLabel={etiket} hitSlop={8}>
       <Text style={st.kontrolYazi}>{simge}</Text>
@@ -236,7 +240,7 @@ function Kontrol({ simge, etiket, onPress }: { simge: string; etiket: string; on
   );
 }
 
-const st = StyleSheet.create({
+const useSt = stil((Renk) => ({
   ekran: { flex: 1, backgroundColor: Renk.gece, paddingHorizontal: Bosluk.l },
   ortala: { alignItems: 'center' },
   ust: { flexDirection: 'row', alignItems: 'center', gap: Bosluk.m, height: 40 },
@@ -252,5 +256,5 @@ const st = StyleSheet.create({
   kontroller: { flexDirection: 'row', alignItems: 'center', gap: Bosluk.xl },
   kontrol: { width: 52, height: 52, borderRadius: 26, backgroundColor: Renk.gece2, borderWidth: 1, borderColor: Renk.cizgi, alignItems: 'center', justifyContent: 'center' },
   kontrolYazi: { color: Renk.kemik, fontSize: 16 },
-  bittiIsaret: { fontSize: 72, color: Renk.volt, fontFamily: Yazi.kalin },
-});
+  bittiIsaret: { fontSize: 72, color: Renk.vurgu, fontFamily: Yazi.kalin },
+}));

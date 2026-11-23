@@ -1,7 +1,7 @@
 # Doğru Disiplin uygulaması
 
 - Kullanıcı Türkçe konuşur; arayüz metinleri Türkçe, kod adları Türkçe (mevcut stile uy).
-- Marka: Gece + Volt (#14181F / #F2F2EE / #C8F031). Sadece koyu tema.
+- Marka: Gece + Volt (#14181F / #F2F2EE / #C8F031). Koyu ve açık tema (Oğuz, 2026-11-23); varsayılan telefona uyar, Ayarlar'dan seçilir. Renkler yalnız `useRenk()` / `stil((Renk) => ...)` ile (src/lib/tema.ts); sabit renk yazma. Volt açık zeminde yazı olarak okunmaz: yazıda `Renk.vurgu`, volt dolgu üstünde `Renk.voltUstu`. Hareket çizimleri iki temada da koyu karo.
 - Tasarım dili (2026-11-23): rakiplerden (Bend vb.) yalnız sadelik alınır, görünüm kopyalanmaz (açık zemin + pastel daire = rakip). Başlıklar Inter kalın, cümle düzeni (`Baslik`); Anton yalnız büyük sayılarda (`Sayi`: disiplin günü, 01–08, geri sayım) ve açılış sözünde. İmza işaret: kare (`IsaretKare`: boş / tam / çapraz yarım = küçük hâli). Kartlar ince kenarlı, köşe 26; ana düğme volt hap.
 - Karakter çizgi adam DEĞİL: Reels'teki marka karakteri (dağınık koyu kahve saç, yüzsüz, çıplak gövde, gri şort + siyah tayt, beyaz ayakkabı, volt bileklik). Bütün görseller GPT (gpt-image-2) ile bu karakterden çizilir; referans `assets/images/karakter-sayfa.png`, tarifler repo dışında (`dogrudisiplin-gorseller/uygulama/yeni-stil/`).
 - Seri sıfırlanmaz: toplam gün + haftalık hedef; her alışkanlığın "küçük hâli" de sayılır.

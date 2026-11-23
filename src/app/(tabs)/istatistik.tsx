@@ -1,13 +1,16 @@
 import { router } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import { KiloGrafik } from '@/components/kilo-grafik';
 import { Baslik, Bolum, Dugme, Ekran, Kart, M, Sayi } from '@/components/ui';
-import { Bosluk, Kose, Renk } from '@/constants/theme';
+import { Bosluk, Kose } from '@/constants/theme';
 import { sonGunler } from '@/lib/tarih';
 import { useVeri } from '@/store';
+import { stil, useRenk } from '@/lib/tema';
 
 export default function Istatistik() {
+  const Renk = useRenk();
+  const st = useSt();
   const antrenmanlar = useVeri((s) => s.antrenmanlar);
   const aliskanliklar = useVeri((s) => s.aliskanliklar);
   const isaretler = useVeri((s) => s.isaretler);
@@ -60,7 +63,7 @@ export default function Istatistik() {
                   <M tur="kucuk">kg</M>
                 </View>
                 {haftalikFark !== undefined ? (
-                  <M tur="kucuk" renk={Renk.volt}>
+                  <M tur="kucuk" renk={Renk.vurgu}>
                     {haftalikFark > 0 ? '+' : ''}
                     {haftalikFark.toFixed(1)} kg / hafta
                   </M>
@@ -79,6 +82,8 @@ export default function Istatistik() {
 }
 
 function Kutu({ deger, etiket, vurgu }: { deger: number | string; etiket: string; vurgu?: boolean }) {
+  const Renk = useRenk();
+  const st = useSt();
   return (
     <View style={st.kutu}>
       <Sayi deger={deger} boyut={38} renk={vurgu ? Renk.volt : Renk.kemik} />
@@ -87,7 +92,7 @@ function Kutu({ deger, etiket, vurgu }: { deger: number | string; etiket: string
   );
 }
 
-const st = StyleSheet.create({
+const useSt = stil((Renk) => ({
   izgara: { flexDirection: 'row', flexWrap: 'wrap', gap: Bosluk.m },
   kutu: {
     width: '47%',
@@ -102,4 +107,4 @@ const st = StyleSheet.create({
   takvim: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   gun: { width: 26, height: 26, borderRadius: 7, backgroundColor: Renk.gece3 },
   kiloUst: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-});
+}));

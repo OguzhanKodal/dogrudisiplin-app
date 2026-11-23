@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import Svg, { Circle, Line, Path, Text as SvgText } from 'react-native-svg';
 
-import { Renk } from '@/constants/theme';
+
 import { kisaTarih } from '@/lib/tarih';
 import type { KiloKaydi } from '@/store';
+import { useRenk } from '@/lib/tema';
 
 /** Kilo çizgisi: kayıtlar volt çizgi, hedef kesikli çizgi. */
 export function KiloGrafik({ kayitlar, hedef }: { kayitlar: KiloKaydi[]; hedef?: number }) {
+  const Renk = useRenk();
   const [genislik, setGenislik] = useState(0);
   const yukseklik = 170;
   const pad = { sol: 8, sag: 40, ust: 14, alt: 22 };
@@ -40,8 +42,8 @@ export function KiloGrafik({ kayitlar, hedef }: { kayitlar: KiloKaydi[]; hedef?:
               </SvgText>
             </>
           ) : null}
-          <Path d={yol} stroke={Renk.volt} strokeWidth={2.5} fill="none" strokeLinejoin="round" />
-          <Circle cx={x(son.length - 1)} cy={y(son[son.length - 1].kg)} r={5} fill={Renk.volt} />
+          <Path d={yol} stroke={Renk.vurgu} strokeWidth={2.5} fill="none" strokeLinejoin="round" />
+          <Circle cx={x(son.length - 1)} cy={y(son[son.length - 1].kg)} r={5} fill={Renk.vurgu} />
           <SvgText x={pad.sol} y={yukseklik - 4} fill={Renk.soluk} fontSize={10}>
             {kisaTarih(son[0].tarih)}
           </SvgText>

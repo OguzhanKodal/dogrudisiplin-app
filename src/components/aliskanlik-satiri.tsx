@@ -1,13 +1,16 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { IsaretKare } from '@/components/ui';
-import { Bosluk, Renk, Yazi } from '@/constants/theme';
+import { Bosluk, Yazi } from '@/constants/theme';
 import { tik } from '@/lib/ses';
 import { gunAnahtari } from '@/lib/tarih';
 import { useVeri, type Aliskanlik } from '@/store';
+import { stil, useRenk } from '@/lib/tema';
 
 /** Dokun: yaptım. Basılı tut: küçük hâlini yaptım (o da sayılır). Tekrar dokun: geri al. */
 export function AliskanlikSatiri({ a, gun = gunAnahtari(), son }: { a: Aliskanlik; gun?: string; son?: boolean }) {
+  const Renk = useRenk();
+  const st = useSt();
   const isaret = useVeri((s) => s.isaretler[gun]?.[a.id]);
   const isaretle = useVeri((s) => s.isaretle);
 
@@ -35,10 +38,10 @@ export function AliskanlikSatiri({ a, gun = gunAnahtari(), son }: { a: Aliskanli
   );
 }
 
-const st = StyleSheet.create({
+const useSt = stil((Renk) => ({
   satir: { flexDirection: 'row', alignItems: 'center', gap: Bosluk.m, paddingVertical: 14 },
   cizgi: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: Renk.pasif },
   simge: { fontSize: 20, opacity: 0.9 },
   ad: { fontFamily: Yazi.orta, color: Renk.kemik, fontSize: 16 },
   kucuk: { fontFamily: Yazi.normal, color: Renk.soluk, fontSize: 12.5, marginTop: 2 },
-});
+}));

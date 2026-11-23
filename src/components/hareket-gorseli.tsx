@@ -1,8 +1,9 @@
 import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { Renk, Yazi } from '@/constants/theme';
+import { Yazi } from '@/constants/theme';
+import { stil, useRenk } from '@/lib/tema';
 
 // GPT (gpt-image-2) çizimleri: hareket başına 1–2 poz + kas kartı. Anahtar = hareket id'si.
 // Çizimin kendi koyu yuvarlak karesi var; köşe yarıçapı kenarın ~%12'si (KOSE_ORANI) olmalı ki dış köşeler görünmesin.
@@ -52,6 +53,7 @@ export const kapakGorseli = (id: string) => {
 
 /** Sabit hareket karesi (liste, kart küçük resimleri). */
 export function Karo({ kaynak, boyut, style }: { kaynak?: number; boyut: number; style?: StyleProp<ViewStyle> }) {
+  const Renk = useRenk();
   const kose = Math.round(boyut * KOSE_ORANI);
   if (!kaynak) return <View style={[{ width: boyut, height: boyut, borderRadius: kose, backgroundColor: Renk.gece3 }, style]} />;
   return (
@@ -75,6 +77,7 @@ export function HareketGorseli({
   tempoMs?: number;
   boyut?: number;
 }) {
+  const st = useSt();
   const kayit = POZLAR[id];
   const [kare, setKare] = useState(0);
   useEffect(() => {
@@ -105,7 +108,7 @@ export function HareketGorseli({
   );
 }
 
-const st = StyleSheet.create({
+const useSt = stil((Renk) => ({
   yer: {
     backgroundColor: Renk.gece2,
     borderWidth: 1,
@@ -116,4 +119,4 @@ const st = StyleSheet.create({
   },
   yerYazi: { fontFamily: Yazi.kalin, color: Renk.kemik, fontSize: 20, textAlign: 'center', paddingHorizontal: 12 },
   yerAlt: { fontFamily: Yazi.normal, color: Renk.soluk, fontSize: 12 },
-});
+}));

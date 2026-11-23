@@ -16,6 +16,7 @@ export type Aliskanlik = {
 };
 
 export type Isaret = 'tam' | 'kucuk';
+export type TemaTercihi = 'sistem' | 'acik' | 'koyu';
 
 export type Antrenman = { id: string; programId: string; tarih: string; sureSn: number; sinav: number };
 
@@ -31,6 +32,7 @@ type Durum = {
   kilolar: KiloKaydi[];
   hedefKg?: number;
   sesAcik: boolean;
+  tema: TemaTercihi;
 
   aliskanlikEkle: (a: Omit<Aliskanlik, 'id' | 'olusturma'>) => void;
   aliskanlikSil: (id: string) => void;
@@ -42,6 +44,7 @@ type Durum = {
   kiloEkle: (kg: number) => void;
   hedefKgAyarla: (kg?: number) => void;
   sesAyarla: (acik: boolean) => void;
+  temaAyarla: (t: TemaTercihi) => void;
 };
 
 const yeniId = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -56,6 +59,7 @@ export const useVeri = create<Durum>()(
       kilolar: [],
       hedefKg: undefined,
       sesAcik: true,
+      tema: 'sistem',
 
       aliskanlikEkle: (a) =>
         set((s) => ({
@@ -111,6 +115,7 @@ export const useVeri = create<Durum>()(
 
       hedefKgAyarla: (kg) => set({ hedefKg: kg }),
       sesAyarla: (acik) => set({ sesAcik: acik }),
+      temaAyarla: (t) => set({ tema: t }),
     }),
     {
       name: 'dogrudisiplin-veri',
@@ -130,6 +135,7 @@ export const useVeri = create<Durum>()(
         kilolar: s.kilolar,
         hedefKg: s.hedefKg,
         sesAcik: s.sesAcik,
+        tema: s.tema,
       }),
     },
   ),

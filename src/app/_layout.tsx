@@ -1,21 +1,23 @@
 import { Anton_400Regular } from '@expo-google-fonts/anton';
 import { Inter_400Regular, Inter_600SemiBold, Inter_700Bold, useFonts } from '@expo-google-fonts/inter';
-import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 
 import { Acilis } from '@/components/acilis';
-import { Renk } from '@/constants/theme';
+import { useAcikMi, useRenk } from '@/lib/tema';
 
 SplashScreen.preventAutoHideAsync();
 
-const tema = {
-  ...DarkTheme,
-  colors: { ...DarkTheme.colors, background: Renk.gece, card: Renk.gece, primary: Renk.volt, text: Renk.kemik },
-};
-
 export default function KokDuzen() {
+  const Renk = useRenk();
+  const acik = useAcikMi();
+  const taban = acik ? DefaultTheme : DarkTheme;
+  const tema = {
+    ...taban,
+    colors: { ...taban.colors, background: Renk.gece, card: Renk.gece, primary: Renk.vurgu, text: Renk.kemik, border: Renk.cizgi },
+  };
   const [yuklendi] = useFonts({ Anton_400Regular, Inter_400Regular, Inter_600SemiBold, Inter_700Bold });
   const [acilisAcik, setAcilisAcik] = useState(true);
 
@@ -27,7 +29,7 @@ export default function KokDuzen() {
 
   return (
     <ThemeProvider value={tema}>
-      <StatusBar style="light" />
+      <StatusBar style={acik ? 'dark' : 'light'} />
       <Stack
         screenOptions={{
           headerStyle: { backgroundColor: Renk.gece },
