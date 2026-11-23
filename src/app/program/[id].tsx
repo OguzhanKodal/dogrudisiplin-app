@@ -1,11 +1,10 @@
-import { Image } from 'expo-image';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { HareketGorseli, kasGorseli } from '@/components/hareket-gorseli';
-import { Baslik, Bolum, Cubuk, Dugme, Ekran, Kart, M } from '@/components/ui';
-import { Bosluk, Kose, Renk, Yazi } from '@/constants/theme';
+import { HareketGorseli, kapakGorseli, Karo, kasGorseli } from '@/components/hareket-gorseli';
+import { Baslik, Bolum, Cubuk, Dugme, Ekran, Kart, M, Sayi } from '@/components/ui';
+import { Bosluk, Renk, Yazi } from '@/constants/theme';
 import { programBul, type Program } from '@/data/programlar';
 import { basari } from '@/lib/ses';
 import { useVeri, uzunBugun } from '@/store';
@@ -28,7 +27,7 @@ function Ust({ p }: { p: Program }) {
       <M tur="etiket" renk={Renk.volt}>
         {p.sure} · {p.seviye}
       </M>
-      <Baslik metin={p.ad} boyut={36} />
+      <Baslik metin={p.ad} boyut={32} />
       <M tur="normal" renk={Renk.soluk}>
         {p.altBaslik}
       </M>
@@ -48,7 +47,8 @@ function KisaProgram({ p }: { p: Program }) {
       <Bolum baslik={`${s.hareketler.length} hareket`}>
         {s.hareketler.map((h, i) => (
           <View key={h.id} style={st.hareket}>
-            <Text style={st.no}>{i + 1}</Text>
+            <Karo kaynak={kapakGorseli(h.id)} boyut={58} />
+            <Sayi deger={`0${i + 1}`} boyut={22} renk={Renk.soluk} style={{ width: 30 }} />
             <View style={{ flex: 1 }}>
               <M tur="normal" style={{ fontFamily: Yazi.orta }}>
                 {h.ad}
@@ -94,7 +94,7 @@ function UzunProgram({ p }: { p: Program }) {
       {p.id.startsWith('sinav') ? (
         <View style={st.gorseller}>
           <HareketGorseli id="sinav" ad="Şınav" oynuyor boyut={160} tempoMs={1300} />
-          <Image source={kasGorseli('sinav')} style={st.kas} contentFit="cover" />
+          <Karo kaynak={kasGorseli('sinav')} boyut={160} />
         </View>
       ) : null}
 
@@ -118,7 +118,7 @@ function UzunProgram({ p }: { p: Program }) {
           </M>
           {bugun.dinlenme ? (
             <>
-              <Baslik metin="DİNLENME GÜNÜ" boyut={30} />
+              <Baslik metin="Dinlenme günü" boyut={26} />
               <M tur="kucuk">Kaslar dinlenirken güçlenir. Yarın devam.</M>
               {!bugunYapildi ? (
                 <Dugme metin="Dinlendim" tur="ikincil" onPress={() => kaydet(p.id, bugunNo, 0)} />
@@ -126,7 +126,7 @@ function UzunProgram({ p }: { p: Program }) {
             </>
           ) : bugunYapildi ? (
             <>
-              <Baslik metin={`${il.tamam[bugunNo]} ŞINAV ✓`} boyut={30} />
+              <Baslik metin={`${il.tamam[bugunNo]} şınav ✓`} boyut={26} />
               <M tur="kucuk">Bugünü kazandın. Yarın hedef: {gunler[bugunNo]?.hedef ?? '—'}</M>
             </>
           ) : (
@@ -208,7 +208,7 @@ function Rehber({ p }: { p: Program }) {
         <Pressable key={b.baslik} onPress={() => setAcik(acik === i ? -1 : i)}>
           <Kart vurgulu={acik === i}>
             <View style={st.hareket}>
-              <Text style={st.no}>{i + 1}</Text>
+              <Sayi deger={`0${i + 1}`} boyut={22} renk={acik === i ? Renk.volt : Renk.soluk} style={{ width: 30 }} />
               <M tur="buyuk" style={{ flex: 1 }}>
                 {b.baslik}
               </M>
@@ -223,22 +223,20 @@ function Rehber({ p }: { p: Program }) {
 
 const st = StyleSheet.create({
   hareket: { flexDirection: 'row', alignItems: 'center', gap: Bosluk.m },
-  no: { fontFamily: Yazi.baslik, color: Renk.volt, fontSize: 22, width: 28 },
-  gorseller: { flexDirection: 'row', gap: Bosluk.m },
-  kas: { width: 160, height: 160, borderRadius: Kose.m, flex: 1 },
+  gorseller: { flexDirection: 'row', gap: Bosluk.m, justifyContent: 'center' },
   sayac: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Bosluk.xl, marginVertical: Bosluk.s },
-  sayacYazi: { fontFamily: Yazi.baslik, color: Renk.kemik, fontSize: 56, minWidth: 90, textAlign: 'center' },
+  sayacYazi: { fontFamily: Yazi.baslik, color: Renk.kemik, fontSize: 56, lineHeight: 72, minWidth: 90, textAlign: 'center' },
   sayacDugme: { width: 52, height: 52, borderRadius: 26, backgroundColor: Renk.gece3, alignItems: 'center', justifyContent: 'center' },
   sayacDugmeYazi: { color: Renk.kemik, fontSize: 28, fontFamily: Yazi.kalin, marginTop: -2 },
   izgara: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   gun: {
     width: '18.2%',
     aspectRatio: 1,
-    borderRadius: 8,
-    backgroundColor: Renk.gece2,
+    borderRadius: 10,
+    backgroundColor: Renk.gece3,
     alignItems: 'center',
     justifyContent: 'center',
   },
   gunNo: { fontFamily: Yazi.kalin, color: Renk.soluk, fontSize: 11 },
-  gunHedef: { fontFamily: Yazi.baslik, color: Renk.kemik, fontSize: 16 },
+  gunHedef: { fontFamily: Yazi.baslik, color: Renk.kemik, fontSize: 16, lineHeight: 22 },
 });

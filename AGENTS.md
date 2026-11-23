@@ -1,14 +1,14 @@
 # Doğru Disiplin uygulaması
 
 - Kullanıcı Türkçe konuşur; arayüz metinleri Türkçe, kod adları Türkçe (mevcut stile uy).
-- Marka: Gece + Volt (#14181F / #F2F2EE / #C8F031), Anton + Inter. Sadece koyu tema.
-- Karakter çizgi adam DEĞİL: Reels'teki marka karakteri (dağınık koyu kahve saç, yüzsüz, çıplak gövde, gri şort + siyah tayt, beyaz ayakkabı, volt bileklik). Bütün görseller GPT (gpt-image-2) ile bu karakterden çizilir; referans `assets/images/karakter-sayfa.png`, tarifler `~/Desktop/dogrudisiplin-gorseller/uygulama/ham/`.
+- Marka: Gece + Volt (#14181F / #F2F2EE / #C8F031). Sadece koyu tema.
+- Tasarım dili (2026-11-23): rakiplerden (Bend vb.) yalnız sadelik alınır, görünüm kopyalanmaz (açık zemin + pastel daire = rakip). Başlıklar Inter kalın, cümle düzeni (`Baslik`); Anton yalnız büyük sayılarda (`Sayi`: disiplin günü, 01–08, geri sayım) ve açılış sözünde. İmza işaret: kare (`IsaretKare`: boş / tam / çapraz yarım = küçük hâli). Kartlar ince kenarlı, köşe 26; ana düğme volt hap.
+- Karakter çizgi adam DEĞİL: Reels'teki marka karakteri (dağınık koyu kahve saç, yüzsüz, çıplak gövde, gri şort + siyah tayt, beyaz ayakkabı, volt bileklik). Bütün görseller GPT (gpt-image-2) ile bu karakterden çizilir; referans `assets/images/karakter-sayfa.png`, tarifler repo dışında (`dogrudisiplin-gorseller/uygulama/yeni-stil/`).
 - Seri sıfırlanmaz: toplam gün + haftalık hedef; her alışkanlığın "küçük hâli" de sayılır.
 - Sesli anons şimdilik expo-speech (tr-TR); Oğuz'un ElevenLabs kayıtları gelince cümle başına MP3 (expo-audio), `src/lib/ses.ts` arayüzü aynı kalır.
-- Oğuz geri bildirimi (2026-11-22): Anton başlıklarda Türkçe işaretler kesilmesin → `Baslik` satır yüksekliği ≥1.3×; büyük harf için her zaman `trBuyuk` (textTransform/toUpperCase "DAKIKA" yazar). Geri sayım halkası Reanimated ile UI thread'de akar; saniyede bir JS güncellemesiyle çizme.
-- GPT hareket çizimi: 2. kare için 1. kareyi referans vermek çoğu zaman aynı resmi üretir (özellikle yandan bacak değişimi). Çözüm: iki pozu tek 1536×768 resimde yan yana çizdir (`<id>-cift.txt`), `sips -c 768 768 --cropOffset 0 0|768` ile böl. Yandan iki bacak ayırt edilemez; zıt faz yerine "diz yukarı ↔ iki ayak yerde" gibi net fark seç.
+- Oğuz geri bildirimi (2026-11-22): Anton'da Türkçe işaretler/rakam üstleri kesilmesin → satır yüksekliği ≥1.25×; büyük harf için her zaman `trBuyuk` (textTransform/toUpperCase "DAKIKA" yazar). Geri sayım halkası Reanimated ile UI thread'de akar; saniyede bir JS güncellemesiyle çizme.
+- GPT hareket çizimi (yeni stil): her hareket tek 1024×1024 resimde 2×2 koyu karo (sol üst 1. poz, sağ üst 2. poz, sol alt kas kartı); referans karakter sayfası + stil örneği. Karolar sınır tespitiyle kesilir (macOS `sips` kırpma ofsetini yok sayıyor). Çizimin kendi yuvarlak köşesi var: gösterirken köşe = kenar × `KOSE_ORANI` (0.13). Bacak değişen hareketlerde 3/4 önden çizdir; yandan iki bacak ayırt edilmez. 2. kareyi 1. kareyi referans vererek üretmek aynı resmi verir.
 - Hakkında/Ayarlar ekranında "Powered by Nüve Dijital" (nuvedigital.com) kalır.
-- Ürün notları ve kararlar: nüve kasası `knowledge/concepts/dogrudisiplin-uygulama-rakip-analizi.md`.
 
 This is an Expo/React Native mobile application. Prioritize mobile-first patterns, performance, and cross-platform compatibility.
 

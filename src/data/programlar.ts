@@ -28,6 +28,7 @@ export type Program = {
   gunler?: UzunGun[]; // uzun programlar
   bolumler?: { baslik: string; metin: string }[]; // rehberler
   yakinda?: boolean;
+  kapak?: string; // küçük resim olarak kullanılacak hareket id'si
 };
 
 export type UzunGun = { gun: number; hedef: number; birim: 'tekrar' | 'sn'; dinlenme?: boolean };
@@ -121,6 +122,7 @@ export const PROGRAMLAR: Program[] = [
     sure: '5 dk',
     seviye: 'Başlangıç',
     seans: sabah5,
+    kapak: 'squat',
   },
   {
     id: 'sinav-30',
@@ -130,6 +132,7 @@ export const PROGRAMLAR: Program[] = [
     sure: '30 gün',
     seviye: 'Herkes',
     gunler: sinav30(),
+    kapak: 'sinav',
   },
   {
     id: 'kalisteniks-baslangic',
@@ -139,6 +142,7 @@ export const PROGRAMLAR: Program[] = [
     sure: '4 hafta',
     seviye: 'Başlangıç',
     yakinda: true,
+    kapak: 'plank',
   },
   {
     id: 'yuzme-taktikleri',

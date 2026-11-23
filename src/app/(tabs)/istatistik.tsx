@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { KiloGrafik } from '@/components/kilo-grafik';
-import { Baslik, Bolum, Dugme, Ekran, Kart, M } from '@/components/ui';
+import { Baslik, Bolum, Dugme, Ekran, Kart, M, Sayi } from '@/components/ui';
 import { Bosluk, Kose, Renk } from '@/constants/theme';
 import { sonGunler } from '@/lib/tarih';
 import { useVeri } from '@/store';
@@ -30,13 +30,13 @@ export default function Istatistik() {
 
   return (
     <Ekran>
-      <Baslik metin="İSTATİSTİK" boyut={40} />
+      <Baslik metin="İstatistik" boyut={34} />
 
       <View style={st.izgara}>
-        <Sayi deger={gunler.size} etiket="antrenman günü" />
-        <Sayi deger={toplamSinav} etiket="toplam şınav" />
-        <Sayi deger={`%${oran}`} etiket="alışkanlık (30 gün)" />
-        <Sayi deger={toplamDakika} etiket="dakika" />
+        <Kutu deger={gunler.size} etiket="antrenman günü" vurgu />
+        <Kutu deger={toplamSinav} etiket="toplam şınav" />
+        <Kutu deger={`%${oran}`} etiket="alışkanlık · 30 gün" />
+        <Kutu deger={toplamDakika} etiket="dakika" />
       </View>
 
       <Bolum baslik="Son 30 gün">
@@ -55,7 +55,10 @@ export default function Istatistik() {
           {sonKilo ? (
             <>
               <View style={st.kiloUst}>
-                <Baslik metin={`${sonKilo.kg.toFixed(1)} KG`} boyut={32} />
+                <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
+                  <Sayi deger={sonKilo.kg.toFixed(1)} boyut={40} renk={Renk.kemik} />
+                  <M tur="kucuk">kg</M>
+                </View>
                 {haftalikFark !== undefined ? (
                   <M tur="kucuk" renk={Renk.volt}>
                     {haftalikFark > 0 ? '+' : ''}
@@ -75,10 +78,10 @@ export default function Istatistik() {
   );
 }
 
-function Sayi({ deger, etiket }: { deger: number | string; etiket: string }) {
+function Kutu({ deger, etiket, vurgu }: { deger: number | string; etiket: string; vurgu?: boolean }) {
   return (
-    <View style={st.sayi}>
-      <Baslik metin={String(deger)} boyut={34} />
+    <View style={st.kutu}>
+      <Sayi deger={deger} boyut={38} renk={vurgu ? Renk.volt : Renk.kemik} />
       <M tur="kucuk">{etiket}</M>
     </View>
   );
@@ -86,8 +89,17 @@ function Sayi({ deger, etiket }: { deger: number | string; etiket: string }) {
 
 const st = StyleSheet.create({
   izgara: { flexDirection: 'row', flexWrap: 'wrap', gap: Bosluk.m },
-  sayi: { width: '47.5%', flexGrow: 1, backgroundColor: Renk.gece2, borderRadius: Kose.m, padding: Bosluk.l, gap: 2 },
+  kutu: {
+    width: '47%',
+    flexGrow: 1,
+    backgroundColor: Renk.gece2,
+    borderRadius: Kose.l,
+    borderWidth: 1,
+    borderColor: Renk.cizgi,
+    padding: Bosluk.l,
+    paddingTop: Bosluk.m,
+  },
   takvim: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  gun: { width: 26, height: 26, borderRadius: 6, backgroundColor: Renk.gece3 },
-  kiloUst: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
+  gun: { width: 26, height: 26, borderRadius: 7, backgroundColor: Renk.gece3 },
+  kiloUst: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
 });

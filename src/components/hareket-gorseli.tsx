@@ -1,12 +1,12 @@
 import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { Kose, Renk, Yazi } from '@/constants/theme';
-import { trBuyuk } from '@/lib/metin';
+import { Renk, Yazi } from '@/constants/theme';
 
 // GPT (gpt-image-2) çizimleri: hareket başına 1–2 poz + kas kartı. Anahtar = hareket id'si.
-// Tarifler: ~/Desktop/dogrudisiplin-gorseller/uygulama/ham/ (./hareket-ciz.sh <id>)
+// Çizimin kendi koyu yuvarlak karesi var; köşe yarıçapı kenarın ~%12'si (KOSE_ORANI) olmalı ki dış köşeler görünmesin.
+// Tarifler: ~/Desktop/dogrudisiplin-gorseller/uygulama/yeni-stil/ (./hareket.sh <id>, 2x2 karo, karo kesici ile bölünür)
 const POZLAR: Record<string, { pozlar: number[]; kas: number }> = {
   'kol-cevirme': {
     pozlar: [require('@/assets/images/hareket/kol-cevirme-1.png'), require('@/assets/images/hareket/kol-cevirme-2.png')],
@@ -42,7 +42,24 @@ const POZLAR: Record<string, { pozlar: number[]; kas: number }> = {
   },
 };
 
+export const KOSE_ORANI = 0.13;
 export const kasGorseli = (id: string) => POZLAR[id]?.kas;
+/** Hareketin en anlatan pozu (küçük resimler için): varsa 2. poz. */
+export const kapakGorseli = (id: string) => {
+  const k = POZLAR[id];
+  return k ? k.pozlar[k.pozlar.length - 1] : undefined;
+};
+
+/** Sabit hareket karesi (liste, kart küçük resimleri). */
+export function Karo({ kaynak, boyut, style }: { kaynak?: number; boyut: number; style?: StyleProp<ViewStyle> }) {
+  const kose = Math.round(boyut * KOSE_ORANI);
+  if (!kaynak) return <View style={[{ width: boyut, height: boyut, borderRadius: kose, backgroundColor: Renk.gece3 }, style]} />;
+  return (
+    <View style={[{ width: boyut, height: boyut, borderRadius: kose, overflow: 'hidden' }, style]}>
+      <Image source={kaynak} style={{ width: boyut, height: boyut }} contentFit="cover" />
+    </View>
+  );
+}
 
 /** Çalışırken pozlar arasında yumuşak geçişle gidip gelir (tempo: `tempoMs`). */
 export function HareketGorseli({
@@ -66,35 +83,37 @@ export function HareketGorseli({
     return () => clearInterval(t);
   }, [oynuyor, id, tempoMs]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const kose = Math.round(boyut * KOSE_ORANI);
   if (!kayit) {
     return (
-      <View style={[st.yer, { width: boyut, height: boyut * 0.62 }]}>
-        <Text style={st.yerYazi}>{trBuyuk(ad)}</Text>
+      <View style={[st.yer, { width: boyut, height: boyut, borderRadius: kose }]}>
+        <Text style={st.yerYazi}>{ad}</Text>
         <Text style={st.yerAlt}>Çizim yakında</Text>
       </View>
     );
   }
   return (
-    <Image
-      source={kayit.pozlar[oynuyor ? kare % kayit.pozlar.length : 0]}
-      style={{ width: boyut, height: boyut, borderRadius: Kose.m }}
-      contentFit="cover"
-      transition={{ duration: 260, effect: 'cross-dissolve' }}
-      accessibilityLabel={ad}
-    />
+    <View style={{ width: boyut, height: boyut, borderRadius: kose, overflow: 'hidden' }}>
+      <Image
+        source={kayit.pozlar[oynuyor ? kare % kayit.pozlar.length : 0]}
+        style={{ width: boyut, height: boyut }}
+        contentFit="cover"
+        transition={{ duration: 260, effect: 'cross-dissolve' }}
+        accessibilityLabel={ad}
+      />
+    </View>
   );
 }
 
 const st = StyleSheet.create({
   yer: {
-    borderRadius: Kose.m,
-    borderWidth: 1.5,
-    borderColor: Renk.gece3,
-    borderStyle: 'dashed',
+    backgroundColor: Renk.gece2,
+    borderWidth: 1,
+    borderColor: Renk.cizgi,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
   },
-  yerYazi: { fontFamily: Yazi.baslik, color: Renk.kemik, fontSize: 26, lineHeight: 36, textAlign: 'center', paddingHorizontal: 12 },
+  yerYazi: { fontFamily: Yazi.kalin, color: Renk.kemik, fontSize: 20, textAlign: 'center', paddingHorizontal: 12 },
   yerAlt: { fontFamily: Yazi.normal, color: Renk.soluk, fontSize: 12 },
 });

@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Baslik, Dugme, Ekran, Kart, M } from '@/components/ui';
+import { Baslik, Dugme, Ekran, IsaretKare, Kart, M, Sayi } from '@/components/ui';
 import { Bosluk, Renk, Yazi } from '@/constants/theme';
 import { tik } from '@/lib/ses';
 import { buHafta, gunAnahtari, KISA_GUNLER } from '@/lib/tarih';
@@ -13,16 +13,21 @@ export default function Aliskanliklar() {
   return (
     <Ekran>
       <View style={st.ust}>
-        <Baslik metin="ALIŞKANLIK" boyut={40} />
-        <Pressable onPress={() => router.push('/aliskanlik-ekle')} hitSlop={10} accessibilityRole="button">
-          <M tur="etiket" renk={Renk.volt}>
-            + Ekle
-          </M>
+        <Baslik metin="Alışkanlıklar" boyut={34} />
+        <Pressable onPress={() => router.push('/aliskanlik-ekle')} hitSlop={10} accessibilityRole="button" style={st.ekle}>
+          <Text style={st.ekleYazi}>+</Text>
         </Pressable>
       </View>
-      <M tur="kucuk">
-        Kareye dokun: yaptım. Basılı tut: küçük hâlini yaptım (yarım kare, o da sayılır). Seri yok; toplam gün ve haftalık hedef var.
-      </M>
+      <View style={st.aciklama}>
+        <View style={st.aciklamaSatir}>
+          <IsaretKare durum="tam" boyut={16} kose={5} />
+          <M tur="kucuk">dokun: yaptım</M>
+        </View>
+        <View style={st.aciklamaSatir}>
+          <IsaretKare durum="kucuk" boyut={16} kose={5} />
+          <M tur="kucuk">basılı tut: küçük hâli (o da sayılır)</M>
+        </View>
+      </View>
 
       {aliskanliklar.length === 0 ? (
         <Kart>
@@ -46,7 +51,7 @@ function HaftaKarti({ a }: { a: Aliskanlik }) {
   const hedefTamam = buHaftaYapilan >= a.haftalikHedef;
 
   return (
-    <Kart>
+    <Kart style={{ gap: Bosluk.m }}>
       <Pressable
         style={st.baslikSatir}
         onLongPress={() =>
@@ -55,10 +60,17 @@ function HaftaKarti({ a }: { a: Aliskanlik }) {
             { text: 'Sil', style: 'destructive', onPress: () => sil(a.id) },
           ])
         }>
-        <Text style={{ fontSize: 22 }}>{a.simge}</Text>
         <View style={{ flex: 1 }}>
-          <M tur="buyuk">{a.ad}</M>
+          <M tur="buyuk">
+            {a.simge} {a.ad}
+          </M>
           <M tur="kucuk">Küçük hâli: {a.kucuk}</M>
+        </View>
+        <View style={{ alignItems: 'flex-end' }}>
+          <Sayi deger={toplamGun(isaretler, a.id)} boyut={30} renk={Renk.kemik} />
+          <M tur="etiket" style={{ fontSize: 9, marginTop: -4 }}>
+            toplam gün
+          </M>
         </View>
       </Pressable>
       <View style={st.hafta}>
@@ -73,41 +85,33 @@ function HaftaKarti({ a }: { a: Aliskanlik }) {
                 tik();
                 isaretle(a.id, isaret ? null : 'tam', g);
               }}
-              onLongPress={() => isaretle(a.id, 'kucuk', g)}
+              onLongPress={() => {
+                tik(true);
+                isaretle(a.id, 'kucuk', g);
+              }}
               style={st.gun}>
+              <IsaretKare durum={isaret} boyut={36} kose={10} bugun={g === bugun} gelecek={gelecek} />
               <Text style={[st.gunAd, g === bugun && { color: Renk.volt }]}>{KISA_GUNLER[i]}</Text>
-              <View style={[st.kare, gelecek && st.kareGelecek, isaret === 'tam' && st.kareTam]}>
-                {isaret === 'kucuk' ? <View style={st.yarim} /> : null}
-              </View>
             </Pressable>
           );
         })}
       </View>
-      <View style={st.altSatir}>
-        <M tur="kucuk" renk={hedefTamam ? Renk.volt : Renk.soluk}>
-          Bu hafta {buHaftaYapilan}/{a.haftalikHedef} {hedefTamam ? '✓ hedef tamam' : ''}
-        </M>
-        <M tur="kucuk">Toplam {toplamGun(isaretler, a.id)} gün</M>
-      </View>
+      <M tur="kucuk" renk={hedefTamam ? Renk.volt : Renk.soluk}>
+        Bu hafta {buHaftaYapilan}/{a.haftalikHedef}
+        {hedefTamam ? ' · hedef tamam ✓' : ''}
+      </M>
     </Kart>
   );
 }
 
 const st = StyleSheet.create({
-  ust: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
+  ust: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  ekle: { width: 40, height: 40, borderRadius: 20, backgroundColor: Renk.volt, alignItems: 'center', justifyContent: 'center' },
+  ekleYazi: { fontFamily: Yazi.kalin, color: Renk.gece, fontSize: 24, lineHeight: 28 },
+  aciklama: { gap: 6, marginTop: -Bosluk.s },
+  aciklamaSatir: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   baslikSatir: { flexDirection: 'row', alignItems: 'center', gap: Bosluk.m },
-  hafta: { flexDirection: 'row', justifyContent: 'space-between', marginTop: Bosluk.s },
-  gun: { alignItems: 'center', gap: 6, flex: 1 },
+  hafta: { flexDirection: 'row', justifyContent: 'space-between' },
+  gun: { alignItems: 'center', gap: 6 },
   gunAd: { fontFamily: Yazi.orta, fontSize: 11, color: Renk.soluk },
-  kare: {
-    width: 34,
-    height: 34,
-    borderRadius: 8,
-    backgroundColor: Renk.gece3,
-    overflow: 'hidden',
-  },
-  kareGelecek: { backgroundColor: 'transparent', borderWidth: 1, borderColor: Renk.gece3, borderStyle: 'dashed' },
-  kareTam: { backgroundColor: Renk.volt },
-  yarim: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%', backgroundColor: Renk.volt },
-  altSatir: { flexDirection: 'row', justifyContent: 'space-between', marginTop: Bosluk.s },
 });

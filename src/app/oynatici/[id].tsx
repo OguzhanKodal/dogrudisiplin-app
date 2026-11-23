@@ -1,15 +1,14 @@
 // "Birlikte yap" oynatıcısı: YouTube #01'deki gibi sesli anons, dairesel geri sayım, "3 / 8", sıradaki hareket.
-import { Image } from 'expo-image';
 import { useKeepAwake } from 'expo-keep-awake';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Halka } from '@/components/halka';
-import { HareketGorseli, kasGorseli } from '@/components/hareket-gorseli';
-import { Baslik, Dugme, M } from '@/components/ui';
-import { Bosluk, Kose, Renk, Yazi } from '@/constants/theme';
+import { HareketGorseli, Karo, kasGorseli } from '@/components/hareket-gorseli';
+import { Baslik, Dugme, M, Sayi } from '@/components/ui';
+import { Bosluk, Renk, Yazi } from '@/constants/theme';
 import { programBul, type Hareket } from '@/data/programlar';
 import { basari, konus, sus, tik } from '@/lib/ses';
 import { useVeri } from '@/store';
@@ -34,6 +33,7 @@ function adimlariKur(hareketler: Hareket[], giris: string, dinlenme: number): Ad
 export default function Oynatici() {
   useKeepAwake();
   const ins = useSafeAreaInsets();
+  const { width: en, height: boy } = useWindowDimensions();
   const { id } = useLocalSearchParams<{ id: string }>();
   const program = programBul(id);
   const seans = program?.seans;
@@ -135,7 +135,7 @@ export default function Oynatici() {
       <View style={[st.ekran, st.ortala, { paddingTop: ins.top, paddingBottom: ins.bottom + Bosluk.l }]}>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: Bosluk.m }}>
           <Text style={st.bittiIsaret}>✓</Text>
-          <Baslik metin="BİTTİ" boyut={64} />
+          <Baslik metin="Bitti" boyut={56} />
           <M tur="normal" style={{ textAlign: 'center' }}>
             {Math.round(toplamSn.current / 60)} dakikanı kendine verdin.{'\n'}Yarın aynı saatte yine buradayız.
           </M>
@@ -150,52 +150,55 @@ export default function Oynatici() {
   const siradaki = adim.tur === 'calis' ? seans.hareketler[adim.i + 1] : undefined;
   const kalan = Math.max(0, adim.sure - gecen);
   const calisiyor = adim.tur === 'calis';
-  const etiket = adim.tur === 'giris' ? 'HAZIR OL' : adim.tur === 'hazirlan' ? 'SIRADAKİ' : 'ÇALIŞ';
+  const etiket = adim.tur === 'giris' ? 'Hazır ol' : adim.tur === 'hazirlan' ? 'Sıradaki' : 'Çalış';
+  // Çizim: ekranın eninde kare; kısa telefonlarda yüksekliğe göre küçülür.
+  const gorselBoyut = Math.min(en - Bosluk.l * 2, boy * 0.4);
+  const ipucu = adim.tur === 'giris' ? '8 hareket, her biri 25 saniye. Telefonu yere koy.' : calisiyor ? hareket.ortaAnons : 'Çalışan kaslar';
 
   return (
     <View style={[st.ekran, { paddingTop: ins.top + Bosluk.s, paddingBottom: ins.bottom + Bosluk.m }]}>
-      {/* Üst: kapat, sayaç, ilerleme */}
+      {/* Üst: kapat + ilerleme */}
       <View style={st.ust}>
-        <Pressable onPress={kapat} hitSlop={12} accessibilityLabel="Antrenmanı kapat">
-          <Text style={st.kapat}>✕</Text>
+        <Pressable onPress={kapat} hitSlop={12} accessibilityLabel="Antrenmanı kapat" style={st.kapat}>
+          <Text style={st.kapatYazi}>✕</Text>
         </Pressable>
-        <Text style={st.sayac}>
-          <Text style={{ color: Renk.volt }}>{hareketNo + 1}</Text> / {seans.hareketler.length}
-        </Text>
-        <View style={{ width: 24 }} />
-      </View>
-      <View style={st.parcalar}>
-        {seans.hareketler.map((_, i) => (
-          <View
-            key={i}
-            style={[
-              st.parca,
-              (i < hareketNo || (i === hareketNo && calisiyor && kalan === 0)) && { backgroundColor: Renk.volt },
-              i === hareketNo && calisiyor && { backgroundColor: Renk.volt, opacity: 0.5 },
-            ]}
-          />
-        ))}
+        <View style={st.parcalar}>
+          {seans.hareketler.map((_, i) => (
+            <View key={i} style={st.parca}>
+              {i < hareketNo ? <View style={[st.parcaDolu, { width: '100%' }]} /> : null}
+              {i === hareketNo && calisiyor ? <View style={[st.parcaDolu, { width: `${(gecen / adim.sure) * 100}%` }]} /> : null}
+            </View>
+          ))}
+        </View>
       </View>
 
-      {/* Orta: hareket */}
+      {/* Başlık: forma numarası + hareket adı */}
+      <View style={st.baslik}>
+        <Sayi deger={`0${hareketNo + 1}`} boyut={58} renk={calisiyor ? Renk.volt : Renk.pasif} />
+        <View style={{ flex: 1, paddingBottom: 10 }}>
+          <M tur="etiket" renk={calisiyor ? Renk.volt : Renk.soluk}>
+            {`${etiket} · ${hareketNo + 1} / ${seans.hareketler.length}`}
+          </M>
+          <Baslik metin={hareket.ad} boyut={hareket.ad.length > 18 ? 22 : 28} />
+        </View>
+      </View>
+
+      {/* Orta: çizim */}
       <View style={st.orta}>
-        <M tur="etiket" renk={calisiyor ? Renk.volt : Renk.soluk}>
-          {etiket}
-        </M>
-        <Baslik metin={hareket.ad} boyut={34} />
-        {!calisiyor && kasGorseli(hareket.id) ? (
-          <View style={{ alignItems: 'center', gap: 4 }}>
-            <Image source={kasGorseli(hareket.id)} style={st.gorsel} contentFit="cover" />
-            <M tur="kucuk">Çalışan kaslar</M>
-          </View>
+        {!calisiyor && adim.tur !== 'giris' && kasGorseli(hareket.id) ? (
+          <Karo kaynak={kasGorseli(hareket.id)} boyut={gorselBoyut} />
         ) : (
-          <HareketGorseli id={hareket.id} ad={hareket.ad} oynuyor={calisiyor && !duraklatildi} boyut={230} />
+          <HareketGorseli id={hareket.id} ad={hareket.ad} oynuyor={calisiyor && !duraklatildi} boyut={gorselBoyut} />
         )}
+        {ipucu ? (
+          <M tur="kucuk" style={st.ipucu}>
+            {ipucu}
+          </M>
+        ) : null}
       </View>
 
       {/* Alt: geri sayım + kontroller */}
       <View style={st.alt}>
-        <Halka kalan={kalan} toplam={adim.sure} oynuyor={!duraklatildi} anahtar={devir} boyut={150} renk={calisiyor ? Renk.volt : Renk.kemik} alt={duraklatildi ? 'DURDU' : undefined} />
         <View style={st.kontroller}>
           <Kontrol simge="⏮" etiket="Geri" onPress={() => git(adimNo - (adim.tur === 'calis' ? 1 : 2))} />
           <Pressable
@@ -204,24 +207,22 @@ export default function Oynatici() {
               if (!duraklatildi) sus();
               setDuraklatildi((d) => !d);
             }}
-            style={st.oynat}
             accessibilityLabel={duraklatildi ? 'Devam et' : 'Duraklat'}>
-            <Text style={st.oynatYazi}>{duraklatildi ? '▶' : '❚❚'}</Text>
+            <Halka
+              kalan={kalan}
+              toplam={adim.sure}
+              oynuyor={!duraklatildi}
+              anahtar={devir}
+              boyut={132}
+              renk={calisiyor ? Renk.volt : Renk.kemik}
+              alt={duraklatildi ? 'DURDU' : undefined}
+            />
           </Pressable>
           <Kontrol simge="⏭" etiket="Atla" onPress={() => git(adimNo + 1)} />
         </View>
-        {siradaki ? (
-          <View style={st.siradaki}>
-            <M tur="kucuk">Sıradaki</M>
-            <M tur="normal" style={{ fontFamily: Yazi.orta }}>
-              {siradaki.ad}
-            </M>
-          </View>
-        ) : calisiyor ? (
-          <M tur="kucuk" renk={Renk.volt}>
-            Son hareket, bırakma!
-          </M>
-        ) : null}
+        <M tur="kucuk" renk={!siradaki && calisiyor ? Renk.volt : Renk.soluk}>
+          {siradaki ? `Sıradaki: ${siradaki.ad}` : calisiyor ? 'Son hareket, bırakma!' : duraklatildi ? 'Devam için halkaya dokun' : 'Durdurmak için halkaya dokun'}
+        </M>
       </View>
     </View>
   );
@@ -238,19 +239,18 @@ function Kontrol({ simge, etiket, onPress }: { simge: string; etiket: string; on
 const st = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: Renk.gece, paddingHorizontal: Bosluk.l },
   ortala: { alignItems: 'center' },
-  ust: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', height: 40 },
-  kapat: { color: Renk.soluk, fontSize: 22 },
-  sayac: { fontFamily: Yazi.baslik, color: Renk.kemik, fontSize: 24 },
-  parcalar: { flexDirection: 'row', gap: 4, marginTop: Bosluk.s },
-  parca: { flex: 1, height: 5, borderRadius: 3, backgroundColor: Renk.gece3 },
+  ust: { flexDirection: 'row', alignItems: 'center', gap: Bosluk.m, height: 40 },
+  kapat: { width: 32, height: 32, borderRadius: 16, backgroundColor: Renk.gece2, alignItems: 'center', justifyContent: 'center' },
+  kapatYazi: { color: Renk.soluk, fontSize: 15 },
+  parcalar: { flex: 1, flexDirection: 'row', gap: 4 },
+  parca: { flex: 1, height: 4, borderRadius: 2, backgroundColor: Renk.gece3, overflow: 'hidden' },
+  parcaDolu: { height: '100%', backgroundColor: Renk.volt },
+  baslik: { flexDirection: 'row', alignItems: 'flex-end', gap: Bosluk.m, marginTop: Bosluk.m },
   orta: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Bosluk.m },
-  gorsel: { width: 230, height: 230, borderRadius: Kose.m },
-  alt: { alignItems: 'center', gap: Bosluk.m },
+  ipucu: { textAlign: 'center', maxWidth: 290 },
+  alt: { alignItems: 'center', gap: Bosluk.s },
   kontroller: { flexDirection: 'row', alignItems: 'center', gap: Bosluk.xl },
-  kontrol: { width: 52, height: 52, borderRadius: 26, backgroundColor: Renk.gece2, alignItems: 'center', justifyContent: 'center' },
-  kontrolYazi: { color: Renk.kemik, fontSize: 18 },
-  oynat: { width: 68, height: 68, borderRadius: 34, backgroundColor: Renk.volt, alignItems: 'center', justifyContent: 'center' },
-  oynatYazi: { color: Renk.gece, fontSize: 22, fontFamily: Yazi.kalin },
-  siradaki: { alignItems: 'center' },
+  kontrol: { width: 52, height: 52, borderRadius: 26, backgroundColor: Renk.gece2, borderWidth: 1, borderColor: Renk.cizgi, alignItems: 'center', justifyContent: 'center' },
+  kontrolYazi: { color: Renk.kemik, fontSize: 16 },
   bittiIsaret: { fontSize: 72, color: Renk.volt, fontFamily: Yazi.kalin },
 });

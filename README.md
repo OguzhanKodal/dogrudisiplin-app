@@ -14,6 +14,6 @@ npx expo start        # telefonda Expo Go ile QR'ı okut
 - `src/app/program/[id].tsx`: kısa program, 30 günlük program, rehber
 - `src/data/`: programlar, hazır alışkanlık paketleri, açılış sözleri
 - `src/store/`: tüm kullanıcı verisi
-- `assets/images/hareket/`: GPT (gpt-image-2) çizimleri. Tarifler: `~/Desktop/dogrudisiplin-gorseller/uygulama/ham/` (`./ciz.sh <ad>`)
+- `assets/images/hareket/`: GPT (gpt-image-2) çizimleri. Karakterle aynı tarzda, hareket başına 2 poz + çalışan kaslar kartı
 
 Powered by [Nüve Dijital](https://nuvedigital.com)

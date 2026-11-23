@@ -29,7 +29,7 @@ export function Halka({
   renk?: string;
   alt?: string;
 }) {
-  const kalinlik = 14;
+  const kalinlik = 10;
   const r = (boyut - kalinlik) / 2;
   const cevre = 2 * Math.PI * r;
   const oran = useSharedValue(toplam > 0 ? kalan / toplam : 0);
@@ -63,7 +63,7 @@ export function Halka({
           transform={`rotate(-90 ${boyut / 2} ${boyut / 2})`}
         />
       </Svg>
-      <Text style={[st.sayi, { fontSize: boyut * 0.34, lineHeight: boyut * 0.46, color: renk }]}>{Math.ceil(kalan)}</Text>
+      <Text style={[st.sayi, { fontSize: boyut * 0.38, lineHeight: boyut * 0.52, color: renk }]}>{Math.ceil(kalan)}</Text>
       {alt ? <Text style={st.alt}>{alt}</Text> : null}
     </View>
   );

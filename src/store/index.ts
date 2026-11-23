@@ -147,3 +147,22 @@ export function uzunBugun(il: UzunIlerleme | undefined, toplamGun: number) {
 export function toplamGun(isaretler: Durum['isaretler'], id: string) {
   return Object.values(isaretler).filter((g) => g[id]).length;
 }
+
+/**
+ * Bir günün disiplin durumu: antrenman ya da en az bir tam işaret → 'tam'; yalnız küçük hâller → 'kucuk'.
+ * "Disiplin günü" sayısı bunlardan biri olan günlerin toplamıdır; hiç sıfırlanmaz.
+ */
+export function gunDurumu(gun: string, isaretler: Durum['isaretler'], antrenmanGunleri: Set<string>): Isaret | null {
+  if (antrenmanGunleri.has(gun)) return 'tam';
+  const g = isaretler[gun];
+  if (!g) return null;
+  const degerler = Object.values(g);
+  if (degerler.includes('tam')) return 'tam';
+  return degerler.length ? 'kucuk' : null;
+}
+
+export function disiplinGunu(isaretler: Durum['isaretler'], antrenmanGunleri: Set<string>) {
+  const gunler = new Set(antrenmanGunleri);
+  for (const [g, d] of Object.entries(isaretler)) if (Object.keys(d).length) gunler.add(g);
+  return gunler.size;
+}
