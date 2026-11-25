@@ -29,6 +29,7 @@ export type Program = {
   bolumler?: { baslik: string; metin: string }[]; // rehberler
   yakinda?: boolean;
   kapak?: string; // küçük resim olarak kullanılacak hareket id'si
+  hareket?: { id: string; ad: string }; // uzun programın tek hareketi (sayaç ve görseller için)
 };
 
 export type UzunGun = { gun: number; hedef: number; birim: 'tekrar' | 'sn'; dinlenme?: boolean };
@@ -98,20 +99,173 @@ const sabah5: Seans = {
   ],
 };
 
-// 30 gün şınav: her 3 günde hedef artar, her 4. gün dinlenme. Başlangıç seviyesi kullanıcıya göre ölçeklenir.
-function sinav30(): UzunGun[] {
+// 30 günlük program: her gün hedef `artis` kadar artar, her 4. gün dinlenme.
+function artanGunler(baslangic: number, artis: number, birim: UzunGun['birim']): UzunGun[] {
   const gunler: UzunGun[] = [];
-  let hedef = 10;
+  let hedef = baslangic;
   for (let g = 1; g <= 30; g++) {
     if (g % 4 === 0) {
-      gunler.push({ gun: g, hedef: 0, birim: 'tekrar', dinlenme: true });
+      gunler.push({ gun: g, hedef: 0, birim, dinlenme: true });
       continue;
     }
-    gunler.push({ gun: g, hedef, birim: 'tekrar' });
-    hedef += 2; // 10 → 52; gün içinde setlere bölünebilir
+    gunler.push({ gun: g, hedef, birim });
+    hedef += artis; // gün içinde setlere bölünebilir
   }
   return gunler;
 }
+
+const karin4: Seans = {
+  dinlenme: 10,
+  giris:
+    'Dört dakika boyunca sadece karnına odaklanıyoruz. Altı hareket, her biri otuz saniye. Hız değil kontrol istiyorum; yavaş yap, nefesini tutma.',
+  kapanis: 'Bitti. Karnın yanıyorsa doğru yaptın. Yarın tekrar.',
+  hareketler: [
+    {
+      id: 'plank',
+      ad: 'Plank',
+      sure: 30,
+      onAnons: 'İlk hareket plank; dirseklerin omuzlarının altında, vücudun baştan topuğa düz bir çizgi.',
+      ortaAnons: 'Karnını göbeğini omurgana çeker gibi sık, kalçan düşmesin.',
+    },
+    {
+      id: 'mekik',
+      ad: 'Mekik',
+      sure: 30,
+      onAnons: 'Sırtüstü uzan, sırada mekik; kollar göğüste, omuzlarını yerden yavaşça kaldırıyoruz.',
+      ortaAnons: 'Çeneni göğsüne gömme, boynun rahat, işi karnın yapsın.',
+    },
+    {
+      id: 'kopru',
+      ad: 'Köprü',
+      sure: 30,
+      onAnons: 'Şimdi köprü; belini korumak için karnın kadar kalçan da güçlü olmalı.',
+      ortaAnons: 'Yukarıda bir saniye dur, karnını bırakma.',
+    },
+    {
+      id: 'diz-cekme',
+      ad: 'Yerinde diz çekme',
+      sure: 30,
+      onAnons: 'Ayağa kalk, yerinde diz çekiyoruz; her dizi karnına doğru getir ve karnını sık.',
+      ortaAnons: 'Dik dur, geriye yaslanma; dizler göbek hizasına kadar.',
+    },
+    {
+      id: 'plank',
+      ad: 'Plank',
+      sure: 30,
+      onAnons: 'Tekrar plank; bu sefer ilkinden daha sıkı tut, yorgunluk normal.',
+      ortaAnons: 'Titremek güçlendiğin anlamına gelir, kalçanı yukarı kaldırıp kaçma.',
+    },
+    {
+      id: 'mekik',
+      ad: 'Mekik',
+      sure: 30,
+      onAnons: 'Son hareket mekik; ne kaldıysa buraya bırakıyoruz.',
+      ortaAnons: 'Yavaş in, yavaş kalk. Son saniyeler.',
+    },
+  ],
+};
+
+const bacak6: Seans = {
+  dinlenme: 10,
+  giris:
+    'Altı dakikalık bacak ve kalça seansı. Önce kısa bir ısınma, sonra squat, hamle ve köprüyle iki tur. Dizlerini koru, hareketi tam yap.',
+  kapanis: 'Bitti. Merdivenleri yarın hissedeceksin; bu iyi bir şey.',
+  hareketler: [
+    {
+      id: 'kol-cevirme',
+      ad: 'Yerinde yürüyüş + kol çevirme',
+      sure: 30,
+      onAnons: 'Isınarak başlıyoruz; yerinde yürü, kollarını büyük daireler çizerek çevir.',
+      ortaAnons: 'Dizlerini biraz daha yukarı kaldır, vücudun ısınsın.',
+    },
+    {
+      id: 'squat',
+      ad: 'Squat',
+      sure: 40,
+      onAnons: 'İlk tur squat ile başlıyor; ayaklar omuz genişliğinde, kalçayı geriye gönder.',
+      ortaAnons: 'Topuklar yerde kalsın, aşağıda göğsün dik.',
+    },
+    {
+      id: 'hamle',
+      ad: 'Hamle',
+      sure: 40,
+      onAnons: 'Sırada hamle; öne adım at, arka dizini yere doğru indir, bacak değiştir.',
+      ortaAnons: 'Gövden dik, öndeki diz ayak bileğinin üstünde.',
+    },
+    {
+      id: 'kopru',
+      ad: 'Köprü',
+      sure: 40,
+      onAnons: 'Sırtüstü uzan, köprü; kalçanı kaldır ve yukarıda sık.',
+      ortaAnons: 'Topuklarından it, belini değil kalçanı kullan.',
+    },
+    {
+      id: 'squat',
+      ad: 'Squat',
+      sure: 40,
+      onAnons: 'İkinci tur; yine squat, bu sefer biraz daha derine inmeyi dene.',
+      ortaAnons: 'Yorulunca hızlanma, tempo aynı kalsın.',
+    },
+    {
+      id: 'hamle',
+      ad: 'Hamle',
+      sure: 40,
+      onAnons: 'Hamle tekrar; dengen kaçarsa bir elini duvara koyabilirsin.',
+      ortaAnons: 'Her adımda arka diz yere yaklaşsın, acele yok.',
+    },
+    {
+      id: 'diz-cekme',
+      ad: 'Yerinde diz çekme',
+      sure: 30,
+      onAnons: 'Son hareket yerinde diz çekme; kalan enerjini buraya bırak.',
+      ortaAnons: 'Son saniyeler, bırakma.',
+    },
+  ],
+};
+
+const masa3: Seans = {
+  dinlenme: 8,
+  giris:
+    'Uzun süre oturduysan bu üç dakika senin için. Yere inmiyoruz, ayakta yapıyoruz; ofiste, evde, her yerde olur.',
+  kapanis: 'Bitti. Kan dolaşımın açıldı, şimdi işine daha dinç dönebilirsin.',
+  hareketler: [
+    {
+      id: 'kol-cevirme',
+      ad: 'Yerinde yürüyüş + kol çevirme',
+      sure: 30,
+      onAnons: 'Kalk ve yerinde yürü; kollarını büyük daireler çizerek çevir, omuzların açılsın.',
+      ortaAnons: 'Omuzlarını kulaklarından uzaklaştır, göğsün açık.',
+    },
+    {
+      id: 'squat',
+      ad: 'Squat',
+      sure: 30,
+      onAnons: 'Squat; sandalyeye oturur gibi in, sandalyeye değmeden kalk.',
+      ortaAnons: 'Yavaş in, hızlı kalk.',
+    },
+    {
+      id: 'hamle',
+      ad: 'Hamle',
+      sure: 30,
+      onAnons: 'Hamle; öne adım at, bacak değiştir. Oturmaktan kısalan kalça kasları açılsın.',
+      ortaAnons: 'Gövden dik kalsın, öne eğilme.',
+    },
+    {
+      id: 'diz-cekme',
+      ad: 'Yerinde diz çekme',
+      sure: 30,
+      onAnons: 'Yerinde diz çekme; nabzını biraz yükseltiyoruz.',
+      ortaAnons: 'Kollarını da kullan, nefes al ver.',
+    },
+    {
+      id: 'kol-cevirme',
+      ad: 'Yerinde yürüyüş + kol çevirme',
+      sure: 30,
+      onAnons: 'Son olarak sakinleşiyoruz; yerinde yürü, kolları bu sefer ters yöne çevir.',
+      ortaAnons: 'Derin bir nefes al, yavaşça ver.',
+    },
+  ],
+};
 
 export const PROGRAMLAR: Program[] = [
   {
@@ -125,14 +279,56 @@ export const PROGRAMLAR: Program[] = [
     kapak: 'squat',
   },
   {
+    id: 'karin-4',
+    tur: 'kisa',
+    ad: 'Karın 4 dakika',
+    altBaslik: 'Plank, mekik, köprü',
+    sure: '4 dk',
+    seviye: 'Başlangıç',
+    seans: karin4,
+    kapak: 'mekik',
+  },
+  {
+    id: 'bacak-6',
+    tur: 'kisa',
+    ad: 'Bacak ve kalça',
+    altBaslik: 'Squat, hamle, köprü · iki tur',
+    sure: '6 dk',
+    seviye: 'Orta',
+    seans: bacak6,
+    kapak: 'hamle',
+  },
+  {
+    id: 'masa-basi-3',
+    tur: 'kisa',
+    ad: 'Masa başı mola',
+    altBaslik: 'Ayakta, yere inmeden',
+    sure: '3 dk',
+    seviye: 'Başlangıç',
+    seans: masa3,
+    kapak: 'kol-cevirme',
+  },
+  {
     id: 'sinav-30',
     tur: 'uzun',
     ad: '30 gün şınav',
     altBaslik: 'Her gün biraz daha fazla',
     sure: '30 gün',
     seviye: 'Herkes',
-    gunler: sinav30(),
+    gunler: artanGunler(10, 2, 'tekrar'), // 10 → 54
     kapak: 'sinav',
+    hareket: { id: 'sinav', ad: 'şınav' },
+  },
+  {
+    id: 'plank-30',
+    tur: 'uzun',
+    ad: '30 gün plank',
+    altBaslik: '20 saniyeden iki dakikaya',
+    sure: '30 gün',
+    seviye: 'Herkes',
+    gunler: artanGunler(20, 4, 'sn'), // 20 → 108 sn
+    kapak: 'plank',
+    hareket: { id: 'plank', ad: 'plank' },
   },
   {
     id: 'kalisteniks-baslangic',
@@ -143,6 +339,40 @@ export const PROGRAMLAR: Program[] = [
     seviye: 'Başlangıç',
     yakinda: true,
     kapak: 'plank',
+  },
+  {
+    id: 'disiplin-rehberi',
+    tur: 'rehber',
+    ad: 'Disiplin nasıl kurulur',
+    altBaslik: 'Motivasyon bitince ne yapmalı',
+    sure: '6 bölüm',
+    seviye: 'Herkes',
+    bolumler: [
+      {
+        baslik: 'Motivasyonu bekleme',
+        metin: 'Motivasyon gelir ve gider. Disiplin, canın istemediği gün de yapmaktır. O yüzden işi isteğe değil saate bağla: "Kahvaltıdan önce 5 dakika" gibi.',
+      },
+      {
+        baslik: 'Küçük başla',
+        metin: 'İlk hafta hedefin gülünç derecede kolay olsun: 5 şınav, 2 sayfa, 5 dakika. Amaç güçlenmek değil, her gün gelmek. Gelmeyi öğrenince miktarı artırırsın.',
+      },
+      {
+        baslik: 'Küçük hâli de sayılır',
+        metin: 'Zor günde hiç yapmamak yerine küçük hâlini yap. 30 şınav yerine 5 şınav, zinciri korur. Bu uygulamada basılı tutunca küçük hâli işaretlenir; o gün de disiplin günüdür.',
+      },
+      {
+        baslik: 'İki gün üst üste kaçırma',
+        metin: 'Bir gün kaçırmak olur, insanız. Kural şu: ikinci gün asla. Bir kaçırma kaza, iki kaçırma yeni bir alışkanlığın başlangıcıdır.',
+      },
+      {
+        baslik: 'Ortamı hazırla',
+        metin: 'Spor kıyafetini akşamdan çıkar, telefonu yatağın uzağına koy, su şişesini masada tut. İrade kası yorulur; ortam yorulmaz.',
+      },
+      {
+        baslik: 'Kimliğini değiştir',
+        metin: '"Spor yapmaya çalışıyorum" deme, "Ben her gün hareket eden biriyim" de. Her işaretlediğin kare bu kimliğe atılmış bir oy. Disiplin günü sayacın da bu yüzden hiç sıfırlanmaz.',
+      },
+    ],
   },
   {
     id: 'yuzme-taktikleri',

@@ -46,11 +46,11 @@ function KisaProgram({ p }: { p: Program }) {
       <Ust p={p} />
       <Dugme metin="Başla" onPress={() => router.push(`/oynatici/${p.id}`)} />
       <M tur="kucuk">
-        Sesli anlatım seni hareketten harekete taşır. Telefonu yere koy, ekran açık kalır. Her hareket {s.hareketler[0].sure} sn, aralarda kısa mola.
+        Sesli anlatım seni hareketten harekete taşır. Telefonu yere koy, ekran açık kalır. Her hareket {sureAraligi(s.hareketler)} sn, aralarda kısa mola.
       </M>
       <Bolum baslik={`${s.hareketler.length} hareket`}>
         {s.hareketler.map((h, i) => (
-          <View key={h.id} style={st.hareket}>
+          <View key={`${h.id}-${i}`} style={st.hareket}>
             <Karo kaynak={kapakGorseli(h.id)} boyut={58} />
             <Sayi deger={`0${i + 1}`} boyut={22} renk={Renk.soluk} style={{ width: 30 }} />
             <View style={{ flex: 1 }}>
@@ -78,6 +78,10 @@ function UzunProgram({ p }: { p: Program }) {
   const bugun = gunler[bugunNo - 1];
   const [tekrar, setTekrar] = useState<number | null>(null);
   const deger = tekrar ?? bugun?.hedef ?? 0;
+  const ad = p.hareket?.ad ?? 'tekrar';
+  const sn = bugun?.birim === 'sn';
+  const adim = sn ? 5 : 1;
+  const miktar = (n: number | string) => (sn ? `${n} sn ${ad}` : `${n} ${ad}`);
 
   if (p.yakinda || !gunler.length) {
     return (
@@ -97,17 +101,17 @@ function UzunProgram({ p }: { p: Program }) {
     <Ekran>
       <Ust p={p} />
 
-      {p.id.startsWith('sinav') ? (
+      {p.hareket ? (
         <View style={st.gorseller}>
-          <HareketGorseli id="sinav" ad="Şınav" oynuyor boyut={160} tempoMs={1300} />
-          <Karo kaynak={kasGorseli('sinav')} boyut={160} />
+          <HareketGorseli id={p.hareket.id} ad={p.ad} oynuyor boyut={160} tempoMs={1300} />
+          <Karo kaynak={kasGorseli(p.hareket.id)} boyut={160} />
         </View>
       ) : null}
 
       {!il ? (
         <Kart vurgulu>
           <M tur="normal">
-            30 gün boyunca her gün hedef biraz artar. Her 4. gün dinlenme. Hedefi tek seferde yapmak zorunda değilsin; gün içine böl.
+            {gunler.length} gün boyunca her gün hedef biraz artar. Her 4. gün dinlenme. Hedefi tek seferde yapmak zorunda değilsin; gün içine böl.
           </M>
           <Dugme
             metin="Programa başla"
@@ -132,16 +136,18 @@ function UzunProgram({ p }: { p: Program }) {
             </>
           ) : bugunYapildi ? (
             <>
-              <Baslik metin={`${il.tamam[bugunNo]} şınav ✓`} boyut={26} />
-              <M tur="kucuk">Bugünü kazandın. Yarın hedef: {gunler[bugunNo]?.hedef ?? '—'}</M>
+              <Baslik metin={`${miktar(il.tamam[bugunNo])} ✓`} boyut={26} />
+              <M tur="kucuk">Bugünü kazandın. Yarın hedef: {gunler[bugunNo] ? miktar(gunler[bugunNo].hedef) : '—'}</M>
             </>
           ) : (
             <>
-              <M tur="normal">Bugünkü hedef: {bugun.hedef} şınav. Kaç tane yaptın?</M>
+              <M tur="normal">
+                Bugünkü hedef: {miktar(bugun.hedef)}. {sn ? 'Kaç saniye tuttun?' : 'Kaç tane yaptın?'}
+              </M>
               <View style={st.sayac}>
-                <SayacDugme metin="−" onPress={() => setTekrar(Math.max(0, deger - 1))} />
+                <SayacDugme metin="−" onPress={() => setTekrar(Math.max(0, deger - adim))} />
                 <Text style={st.sayacYazi}>{deger}</Text>
-                <SayacDugme metin="+" onPress={() => setTekrar(deger + 1)} />
+                <SayacDugme metin="+" onPress={() => setTekrar(deger + adim)} />
               </View>
               <Dugme
                 metin="Kaydet"
@@ -158,7 +164,7 @@ function UzunProgram({ p }: { p: Program }) {
         </Kart>
       )}
 
-      <Bolum baslik="30 gün">
+      <Bolum baslik={`${gunler.length} gün`}>
         <View style={st.izgara}>
           {gunler.map((g) => {
             const yapilan = il?.tamam[g.gun];
@@ -195,6 +201,14 @@ function UzunProgram({ p }: { p: Program }) {
       ) : null}
     </Ekran>
   );
+}
+
+/** "25" ya da farklı süreler varsa "30–40". */
+function sureAraligi(hareketler: { sure: number }[]) {
+  const s = hareketler.map((h) => h.sure);
+  const en = Math.min(...s);
+  const ek = Math.max(...s);
+  return en === ek ? `${en}` : `${en}–${ek}`;
 }
 
 function SayacDugme({ metin, onPress }: { metin: string; onPress: () => void }) {
