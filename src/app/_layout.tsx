@@ -14,6 +14,7 @@ import { Platform } from 'react-native';
 
 import { Acilis } from '@/components/acilis';
 import { Kose, Yazi } from '@/constants/theme';
+import { useSaatEsitle } from '@/lib/saat';
 import { useAcikMi, useRenk } from '@/lib/tema';
 
 SplashScreen.preventAutoHideAsync();
@@ -29,6 +30,7 @@ export default function KokDuzen() {
     ...taban,
     colors: { ...taban.colors, background: Renk.gece, card: Renk.gece, primary: Renk.vurgu, text: Renk.kemik, border: Renk.cizgi },
   };
+  useSaatEsitle();
   const [yuklendi] = useFonts({ Anton_400Regular, Inter_400Regular, Inter_600SemiBold, Inter_700Bold });
   const [acilisAcik, setAcilisAcik] = useState(true);
 

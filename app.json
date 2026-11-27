@@ -3,7 +3,7 @@
     "name": "Doğru Disiplin",
     "slug": "dogrudisiplin",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "dogrudisiplin",
     "userInterfaceStyle": "automatic",
@@ -60,7 +60,9 @@
         }
       ],
       "expo-asset",
-      "expo-image"
+      "expo-image",
+      "@bacons/apple-targets",
+      "./plugins/wear-os"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -1,0 +1,9 @@
+{
+  "name": "saat-baglanti",
+  "version": "1.0.0",
+  "description": "Telefon ile Apple Watch / Wear OS saat arasında durum ve olay köprüsü",
+  "main": "index.ts",
+  "license": "UNLICENSED",
+  "author": "Oguzhan Kodal",
+  "homepage": "https://nuvedigital.com"
+}

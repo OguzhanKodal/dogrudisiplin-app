@@ -1,0 +1,20 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'com.kodal.dogrudisiplin'
+version = '1.0.0'
+
+android {
+  namespace "expo.modules.saatbaglanti"
+  defaultConfig {
+    versionCode 1
+    versionName "1.0.0"
+  }
+}
+
+dependencies {
+  // Wear OS Data Layer: telefon ↔ saat (aynı paket adı ve imza gerekir).
+  implementation "com.google.android.gms:play-services-wearable:20.0.1"
+}

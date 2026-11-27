@@ -41,3 +41,6 @@ example
 # generated native folders
 /ios
 /android
+
+# Wear OS modülünün derleme çıktısı
+/wear/build

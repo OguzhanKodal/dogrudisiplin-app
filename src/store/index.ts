@@ -38,7 +38,7 @@ type Durum = {
   aliskanlikEkle: (a: Omit<Aliskanlik, 'id' | 'olusturma'>) => void;
   aliskanlikSil: (id: string) => void;
   isaretle: (id: string, isaret: Isaret | null, gun?: string) => void;
-  antrenmanBitir: (a: Omit<Antrenman, 'id' | 'tarih'>) => void;
+  antrenmanBitir: (a: Omit<Antrenman, 'id' | 'tarih'> & { tarih?: string }) => void; // tarih: saatten gelen geçmiş antrenman
   uzunBasla: (programId: string) => void;
   uzunGunKaydet: (programId: string, gun: number, tekrar: number) => void;
   uzunSifirla: (programId: string) => void;
@@ -78,8 +78,8 @@ export const useVeri = create<Durum>()(
           return { isaretler: { ...s.isaretler, [gun]: o } };
         }),
 
-      antrenmanBitir: (a) => {
-        const gun = gunAnahtari();
+      antrenmanBitir: ({ tarih, ...a }) => {
+        const gun = tarih ?? gunAnahtari();
         set((s) => ({ antrenmanlar: [...s.antrenmanlar, { ...a, id: yeniId(), tarih: gun }] }));
         // Bu programa bağlı alışkanlıklar kendiliğinden "yapıldı" olur.
         for (const al of get().aliskanliklar) {

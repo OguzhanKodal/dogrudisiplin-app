@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Simge, type SimgeAd } from '@/components/simge';
 import { Bosluk, DOKUNMA, Kose, Yazi } from '@/constants/theme';
+import { ICERIK_EN } from '@/lib/duzen';
 import { trBuyuk } from '@/lib/metin';
 import { stil, useRenk } from '@/lib/tema';
 
@@ -32,10 +33,15 @@ export function Ekran({ children, kaydir = true, baslikli = false }: { children:
     paddingBottom: ins.bottom + (baslikli ? Bosluk.xl : 100),
     paddingHorizontal: Bosluk.l,
   };
-  if (!kaydir) return <View style={[s.ekran, ic]}>{children}</View>;
+  if (!kaydir)
+    return (
+      <View style={s.ekran}>
+        <View style={[ic, s.icerik, { flex: 1 }]}>{children}</View>
+      </View>
+    );
   return (
     <View style={s.ekran}>
-      <ScrollView contentContainerStyle={[ic, { gap: Bosluk.l }]} contentInsetAdjustmentBehavior="never">
+      <ScrollView contentContainerStyle={[ic, s.icerik]} contentInsetAdjustmentBehavior="never">
         {children}
       </ScrollView>
       {/* Kenardan kenara ekranda kaydırılan içerik durum çubuğunun altında yazıyla çakışmasın. */}
@@ -354,6 +360,8 @@ export function IsaretKare({
 }
 
 const useS = stil((Renk) => ({
+  // Açık katlanabilir / tablet: içerik ortada, okunur genişlikte.
+  icerik: { gap: Bosluk.l, width: '100%', maxWidth: ICERIK_EN, alignSelf: 'center' },
   ekran: { flex: 1, backgroundColor: Renk.gece },
   durumZemin: { position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: Renk.gece, opacity: 0.94 },
   baslik: { fontFamily: Yazi.kalin, color: Renk.kemik },

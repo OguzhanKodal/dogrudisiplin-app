@@ -6,6 +6,7 @@ import { Simge } from '@/components/simge';
 import { Baslik, Bolum, Ekran, KartDugme, M, Sayi } from '@/components/ui';
 import { Bosluk, Yazi } from '@/constants/theme';
 import { PROGRAMLAR, type Program } from '@/data/programlar';
+import { useDuzen } from '@/lib/duzen';
 import { stil, useRenk } from '@/lib/tema';
 
 const GRUPLAR: { tur: Program['tur']; baslik: string }[] = [
@@ -15,14 +16,21 @@ const GRUPLAR: { tur: Program['tur']; baslik: string }[] = [
 ];
 
 export default function Programlar() {
+  const st = useSt();
+  // Açık katlanabilir / tablet: iki sütun.
+  const { genis } = useDuzen();
   return (
     <Ekran>
       <Baslik metin="Programlar" boyut={34} />
       {GRUPLAR.map((g) => (
         <Bolum key={g.tur} baslik={g.baslik}>
-          {PROGRAMLAR.filter((p) => p.tur === g.tur).map((p) => (
-            <ProgramKarti key={p.id} p={p} />
-          ))}
+          <View style={genis ? st.izgara : st.liste}>
+            {PROGRAMLAR.filter((p) => p.tur === g.tur).map((p) => (
+              <View key={p.id} style={genis ? st.izgaraHucre : null}>
+                <ProgramKarti p={p} />
+              </View>
+            ))}
+          </View>
         </Bolum>
       ))}
     </Ekran>
@@ -70,6 +78,9 @@ function ProgramKarti({ p }: { p: Program }) {
 }
 
 const useSt = stil((Renk) => ({
+  liste: { gap: Bosluk.m },
+  izgara: { flexDirection: 'row', flexWrap: 'wrap', gap: Bosluk.m },
+  izgaraHucre: { width: '48.9%' },
   kart: { flexDirection: 'row', alignItems: 'center', gap: Bosluk.m, padding: Bosluk.m, paddingRight: Bosluk.l },
   yerKaro: {
     width: 84,

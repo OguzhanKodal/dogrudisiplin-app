@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Antrenman sırasında nabzını göstermek için.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Bilekte yaptığın antrenmanı Sağlık uygulamasına ve Etkinlik halkalarına kaydetmek için.</string>
+	<key>WKBackgroundModes</key>
+	<array>
+		<string>workout-processing</string>
+	</array>
+	<key>WKApplication</key>
+	<true/>
+</dict>
+</plist>

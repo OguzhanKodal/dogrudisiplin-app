@@ -24,10 +24,7 @@ import { basari, konus, sus, tik } from '@/lib/ses';
 import { stil, useRenk } from '@/lib/tema';
 import { useVeri } from '@/store';
 
-type Adim =
-  | { tur: 'giris'; sure: number }
-  | { tur: 'hazirlan'; i: number; sure: number }
-  | { tur: 'calis'; i: number; sure: number };
+type Adim = { tur: 'giris'; sure: number } | { tur: 'hazirlan'; i: number; sure: number } | { tur: 'calis'; i: number; sure: number };
 
 /** Konuşma süresini kabaca tahmin eder (Türkçe ~2,5 kelime/sn). */
 const konusmaSuresi = (metin: string) => metin.split(/\s+/).length / 2.5;
@@ -235,15 +232,28 @@ export default function Oynatici() {
   const kalan = Math.max(0, adim.sure - gecen);
   const calisiyor = adim.tur === 'calis';
   const etiket = adim.tur === 'giris' ? 'Hazır ol' : adim.tur === 'hazirlan' ? 'Sıradaki' : 'Çalış';
-  // Çizim: ekranın eninde kare; kısa telefonlarda yüksekliğe göre küçülür.
-  const gorselBoyut = Math.round(Math.min(en - Bosluk.l * 2, boy * 0.4));
+  // Çizim: dikeyde ekranın eninde kare (kısa telefonda yüksekliğe, açık katlanabilirde 520'ye göre küçülür);
+  // yatayda (dönmüş telefon, açık katlanabilir yatay) solda, yüksekliğe sığacak boyda.
+  const yatay = en > boy;
+  const gorselBoyut = Math.round(
+    yatay ? Math.min(boy - ins.top - ins.bottom - 96, (en - ins.left - ins.right) * 0.46) : Math.min(en - Bosluk.l * 2, boy * 0.42, 520),
+  );
   const ipucu = adim.tur === 'giris' ? girisIpucu(seans.hareketler) : calisiyor ? hareket.ortaAnons : 'Çalışan kaslar';
   const kasGoster = !calisiyor && adim.tur !== 'giris' && !!kasGorseli(hareket.id);
   // Bir sonraki ekranda gelecek çizim: hazırlanırken bu hareketin pozları, çalışırken sıradakinin kas kartı.
   const onYuklenecek = calisiyor ? siradaki?.id : hareket.id;
 
   return (
-    <View style={[st.ekran, { paddingTop: ins.top + Bosluk.s, paddingBottom: ins.bottom + Bosluk.m }]}>
+    <View
+      style={[
+        st.ekran,
+        {
+          paddingTop: ins.top + Bosluk.s,
+          paddingBottom: ins.bottom + Bosluk.m,
+          paddingLeft: ins.left + Bosluk.l,
+          paddingRight: ins.right + Bosluk.l,
+        },
+      ]}>
       <OnYukle id={onYuklenecek} boyut={gorselBoyut} />
 
       {/* Üst: kapat + ilerleme */}
@@ -259,62 +269,138 @@ export default function Oynatici() {
         </View>
       </View>
 
-      {/* Başlık: forma numarası + hareket adı (yeni harekette yumuşakça belirir) */}
-      <Animated.View key={`b${hareketNo}`} entering={FadeIn.duration(220)} style={st.baslik}>
-        <Sayi deger={iki(hareketNo + 1)} boyut={58} renk={calisiyor ? Renk.volt : Renk.soluk} />
-        <View style={{ flex: 1, paddingBottom: 10 }}>
-          <M tur="etiket" renk={calisiyor ? Renk.vurgu : Renk.soluk}>
-            {`${etiket} · ${hareketNo + 1} / ${seans.hareketler.length}`}
-          </M>
-          <Baslik metin={hareket.ad} boyut={hareket.ad.length > 18 ? 22 : 28} />
-        </View>
-      </Animated.View>
+      {yatay ? (
+        <View style={st.yanYana}>
+          {/* Orta: çizim */}
+          <View style={st.orta}>
+            <Animated.View key={`${kasGoster ? 'k' : 'p'}${hareketNo}`} entering={FadeIn.duration(260)}>
+              {kasGoster ? (
+                <Karo kaynak={kasGorseli(hareket.id)} boyut={gorselBoyut} />
+              ) : (
+                <HareketGorseli id={hareket.id} ad={hareket.ad} oynuyor={calisiyor && !duraklatildi} boyut={gorselBoyut} />
+              )}
+            </Animated.View>
+            {ipucu ? (
+              <M tur="kucuk" style={st.ipucu}>
+                {ipucu}
+              </M>
+            ) : null}
+          </View>
+          <View style={st.sagSutun}>
+            {/* Başlık: forma numarası + hareket adı (yeni harekette yumuşakça belirir) */}
+            <Animated.View key={`b${hareketNo}`} entering={FadeIn.duration(220)} style={st.baslik}>
+              <Sayi deger={iki(hareketNo + 1)} boyut={58} renk={calisiyor ? Renk.volt : Renk.soluk} />
+              <View style={{ flex: 1, paddingBottom: 10 }}>
+                <M tur="etiket" renk={calisiyor ? Renk.vurgu : Renk.soluk}>
+                  {`${etiket} · ${hareketNo + 1} / ${seans.hareketler.length}`}
+                </M>
+                <Baslik metin={hareket.ad} boyut={hareket.ad.length > 18 ? 22 : 28} />
+              </View>
+            </Animated.View>
 
-      {/* Orta: çizim */}
-      <View style={st.orta}>
-        <Animated.View key={`${kasGoster ? 'k' : 'p'}${hareketNo}`} entering={FadeIn.duration(260)}>
-          {kasGoster ? (
-            <Karo kaynak={kasGorseli(hareket.id)} boyut={gorselBoyut} />
-          ) : (
-            <HareketGorseli id={hareket.id} ad={hareket.ad} oynuyor={calisiyor && !duraklatildi} boyut={gorselBoyut} />
-          )}
-        </Animated.View>
-        {ipucu ? (
-          <M tur="kucuk" style={st.ipucu}>
-            {ipucu}
-          </M>
-        ) : null}
-      </View>
-
-      {/* Alt: geri sayım + kontroller */}
-      <View style={st.alt}>
-        <View style={st.kontroller}>
-          <YuvarlakDugme simge="geri" etiket="Önceki adım" onPress={() => git(adimNo - (adim.tur === 'calis' ? 1 : 2))} />
-          <Basilabilir
-            sinirsiz
-            onPress={() => {
-              tik();
-              if (duraklatildi) setDuraklatildi(false);
-              else duraklat();
-            }}
-            accessibilityLabel={duraklatildi ? 'Devam et' : 'Duraklat'}
-            accessibilityValue={{ text: `${Math.ceil(kalan)} saniye kaldı` }}>
-            <Halka
-              kalan={kalan}
-              toplam={adim.sure}
-              oynuyor={!duraklatildi}
-              anahtar={devir}
-              boyut={132}
-              renk={calisiyor ? Renk.volt : Renk.kemik}
-              alt={duraklatildi ? 'DURDU' : undefined}
-            />
-          </Basilabilir>
-          <YuvarlakDugme simge="ileri" etiket="Sonraki adım" onPress={() => git(adimNo + 1)} />
+            {/* Alt: geri sayım + kontroller */}
+            <View style={st.alt}>
+              <View style={st.kontroller}>
+                <YuvarlakDugme simge="geri" etiket="Önceki adım" onPress={() => git(adimNo - (adim.tur === 'calis' ? 1 : 2))} />
+                <Basilabilir
+                  sinirsiz
+                  onPress={() => {
+                    tik();
+                    if (duraklatildi) setDuraklatildi(false);
+                    else duraklat();
+                  }}
+                  accessibilityLabel={duraklatildi ? 'Devam et' : 'Duraklat'}
+                  accessibilityValue={{ text: `${Math.ceil(kalan)} saniye kaldı` }}>
+                  <Halka
+                    kalan={kalan}
+                    toplam={adim.sure}
+                    oynuyor={!duraklatildi}
+                    anahtar={devir}
+                    boyut={132}
+                    renk={calisiyor ? Renk.volt : Renk.kemik}
+                    alt={duraklatildi ? 'DURDU' : undefined}
+                  />
+                </Basilabilir>
+                <YuvarlakDugme simge="ileri" etiket="Sonraki adım" onPress={() => git(adimNo + 1)} />
+              </View>
+              <M tur="kucuk" renk={!siradaki && calisiyor ? Renk.vurgu : Renk.soluk}>
+                {siradaki
+                  ? `Sıradaki: ${siradaki.ad}`
+                  : calisiyor
+                    ? 'Son hareket, bırakma!'
+                    : duraklatildi
+                      ? 'Devam için halkaya dokun'
+                      : 'Durdurmak için halkaya dokun'}
+              </M>
+            </View>
+          </View>
         </View>
-        <M tur="kucuk" renk={!siradaki && calisiyor ? Renk.vurgu : Renk.soluk}>
-          {siradaki ? `Sıradaki: ${siradaki.ad}` : calisiyor ? 'Son hareket, bırakma!' : duraklatildi ? 'Devam için halkaya dokun' : 'Durdurmak için halkaya dokun'}
-        </M>
-      </View>
+      ) : (
+        <>
+          {/* Başlık: forma numarası + hareket adı (yeni harekette yumuşakça belirir) */}
+          <Animated.View key={`b${hareketNo}`} entering={FadeIn.duration(220)} style={st.baslik}>
+            <Sayi deger={iki(hareketNo + 1)} boyut={58} renk={calisiyor ? Renk.volt : Renk.soluk} />
+            <View style={{ flex: 1, paddingBottom: 10 }}>
+              <M tur="etiket" renk={calisiyor ? Renk.vurgu : Renk.soluk}>
+                {`${etiket} · ${hareketNo + 1} / ${seans.hareketler.length}`}
+              </M>
+              <Baslik metin={hareket.ad} boyut={hareket.ad.length > 18 ? 22 : 28} />
+            </View>
+          </Animated.View>
+
+          {/* Orta: çizim */}
+          <View style={st.orta}>
+            <Animated.View key={`${kasGoster ? 'k' : 'p'}${hareketNo}`} entering={FadeIn.duration(260)}>
+              {kasGoster ? (
+                <Karo kaynak={kasGorseli(hareket.id)} boyut={gorselBoyut} />
+              ) : (
+                <HareketGorseli id={hareket.id} ad={hareket.ad} oynuyor={calisiyor && !duraklatildi} boyut={gorselBoyut} />
+              )}
+            </Animated.View>
+            {ipucu ? (
+              <M tur="kucuk" style={st.ipucu}>
+                {ipucu}
+              </M>
+            ) : null}
+          </View>
+
+          {/* Alt: geri sayım + kontroller */}
+          <View style={st.alt}>
+            <View style={st.kontroller}>
+              <YuvarlakDugme simge="geri" etiket="Önceki adım" onPress={() => git(adimNo - (adim.tur === 'calis' ? 1 : 2))} />
+              <Basilabilir
+                sinirsiz
+                onPress={() => {
+                  tik();
+                  if (duraklatildi) setDuraklatildi(false);
+                  else duraklat();
+                }}
+                accessibilityLabel={duraklatildi ? 'Devam et' : 'Duraklat'}
+                accessibilityValue={{ text: `${Math.ceil(kalan)} saniye kaldı` }}>
+                <Halka
+                  kalan={kalan}
+                  toplam={adim.sure}
+                  oynuyor={!duraklatildi}
+                  anahtar={devir}
+                  boyut={132}
+                  renk={calisiyor ? Renk.volt : Renk.kemik}
+                  alt={duraklatildi ? 'DURDU' : undefined}
+                />
+              </Basilabilir>
+              <YuvarlakDugme simge="ileri" etiket="Sonraki adım" onPress={() => git(adimNo + 1)} />
+            </View>
+            <M tur="kucuk" renk={!siradaki && calisiyor ? Renk.vurgu : Renk.soluk}>
+              {siradaki
+                ? `Sıradaki: ${siradaki.ad}`
+                : calisiyor
+                  ? 'Son hareket, bırakma!'
+                  : duraklatildi
+                    ? 'Devam için halkaya dokun'
+                    : 'Durdurmak için halkaya dokun'}
+            </M>
+          </View>
+        </>
+      )}
     </View>
   );
 }
@@ -332,4 +418,6 @@ const useSt = stil((Renk) => ({
   ipucu: { textAlign: 'center', maxWidth: 290 },
   alt: { alignItems: 'center', gap: Bosluk.s },
   kontroller: { flexDirection: 'row', alignItems: 'center', gap: Bosluk.xl },
+  yanYana: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: Bosluk.xl },
+  sagSutun: { flex: 1, justifyContent: 'center', gap: Bosluk.l },
 }));

@@ -1,0 +1,13 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <application>
+    <!-- Saatten gelen olaylar (alışkanlık işareti, biten antrenman): uygulama kapalıyken de alınır, kuyruğa yazılır. -->
+    <service
+      android:name="expo.modules.saatbaglanti.SaatDinleyici"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
+        <data android:scheme="wear" android:host="*" android:pathPrefix="/olay" />
+      </intent-filter>
+    </service>
+  </application>
+</manifest>
