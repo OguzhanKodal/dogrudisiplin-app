@@ -14,12 +14,14 @@ export const KOYU = {
   cizgi: '#2B323D',
   pasif: '#3A424E',
   kemik: '#F2F2EE',
-  soluk: '#8B929D',
+  soluk: '#9097A2', // gece3 üstünde de ≥4.5:1 (WCAG AA)
   volt: '#C8F031',
   vurgu: '#C8F031',
   voltUstu: '#14181F',
   voltSoluk: 'rgba(200,240,49,0.14)',
   kirmizi: '#FF5A5A',
+  dalga: 'rgba(242,242,238,0.14)', // Android basma dalgası (koyu ve gece3 zeminde)
+  dalgaVolt: 'rgba(20,24,31,0.16)', // volt dolgu üstünde basma dalgası
 } as const;
 
 export type Palet = { readonly [K in keyof typeof KOYU]: string };
@@ -33,12 +35,14 @@ export const ACIK: Palet = {
   cizgi: '#E2E2DB',
   pasif: '#BFC2BA',
   kemik: '#14181F',
-  soluk: '#6A707A',
+  soluk: '#61676F', // gece / gece3 üstünde ≥4.5:1
   volt: '#C8F031',
   vurgu: '#4F6B00',
   voltUstu: '#14181F',
   voltSoluk: 'rgba(140,180,0,0.14)',
-  kirmizi: '#D93636',
+  kirmizi: '#C42B2B', // açık zeminde ≥4.5:1
+  dalga: 'rgba(20,24,31,0.10)',
+  dalgaVolt: 'rgba(20,24,31,0.16)',
 };
 
 export const Yazi = {
@@ -50,3 +54,6 @@ export const Yazi = {
 
 export const Bosluk = { s: 6, m: 12, l: 20, xl: 28 } as const;
 export const Kose = { s: 10, m: 18, l: 26 } as const;
+
+/** En küçük dokunma alanı: iOS 44 pt, Android 48 dp. Görsel olarak küçük düğmeler hitSlop ile buna tamamlanır. */
+export const DOKUNMA = 48;

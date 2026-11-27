@@ -24,7 +24,7 @@ export function Acilis({ kapat }: { kapat: () => void }) {
           {soz.kim ? <Text style={st.kim}>— {soz.kim}</Text> : null}
         </View>
         <View style={st.alt}>
-          <Image source={require('@/assets/images/icon.png')} style={st.ikon} />
+          <Image source={require('@/assets/images/ikon-kucuk.png')} style={st.ikon} />
           <Text style={st.devam}>Devam etmek için dokun</Text>
         </View>
       </Pressable>

@@ -70,5 +70,9 @@ const useSt = stil((Renk) => ({
     color: Renk.kemik,
     fontFamily: Yazi.baslik,
     fontSize: 34,
+    // Anton'da Android'in ek yazı payı rakamları kaydırıyor; dikey dolgu iki platformda aynı olsun.
+    paddingVertical: Bosluk.m,
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
 }));

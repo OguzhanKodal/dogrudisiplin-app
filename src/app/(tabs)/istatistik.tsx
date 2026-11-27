@@ -23,8 +23,17 @@ export default function Istatistik() {
 
   // Son 30 gün alışkanlık oranı: yapılan işaret / (alışkanlık × gün)
   const son30 = sonGunler(30);
-  const olasi = aliskanliklar.reduce((t, a) => t + son30.filter((g) => g >= a.olusturma).length, 0);
-  const yapilan = aliskanliklar.reduce((t, a) => t + son30.filter((g) => isaretler[g]?.[a.id]).length, 0);
+  // Eklenmeden önceki bir güne konan işaret de o günü "olası" yapar (yoksa oran %100'ü aşıyordu).
+  let olasi = 0;
+  let yapilan = 0;
+  for (const a of aliskanliklar) {
+    for (const g of son30) {
+      if (isaretler[g]?.[a.id]) {
+        yapilan++;
+        olasi++;
+      } else if (g >= a.olusturma) olasi++;
+    }
+  }
   const oran = olasi ? Math.round((yapilan / olasi) * 100) : 0;
 
   const sonKilo = kilolar.at(-1);

@@ -1,9 +1,10 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, Text, View } from 'react-native';
+import { Alert, Text, View } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { HareketGorseli, kapakGorseli, Karo, kasGorseli } from '@/components/hareket-gorseli';
-import { Baslik, Bolum, Cubuk, Dugme, Ekran, Kart, M, Sayi } from '@/components/ui';
+import { Baslik, Bolum, Cubuk, Dugme, Ekran, Kart, KartDugme, M, Sayi, YuvarlakDugme } from '@/components/ui';
 import { Bosluk, Yazi } from '@/constants/theme';
 import { programBul, type Program } from '@/data/programlar';
 import { basari } from '@/lib/ses';
@@ -13,7 +14,7 @@ import { stil, useRenk } from '@/lib/tema';
 export default function ProgramDetay() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const p = programBul(id);
-  if (!p) return <Ekran><M>Program bulunamadı.</M></Ekran>;
+  if (!p) return <Ekran baslikli><M>Program bulunamadı.</M></Ekran>;
   return (
     <>
       <Stack.Screen options={{ title: p.ad }} />
@@ -42,7 +43,7 @@ function KisaProgram({ p }: { p: Program }) {
   const st = useSt();
   const s = p.seans!;
   return (
-    <Ekran>
+    <Ekran baslikli>
       <Ust p={p} />
       <Dugme metin="Başla" onPress={() => router.push(`/oynatici/${p.id}`)} />
       <M tur="kucuk">
@@ -52,7 +53,7 @@ function KisaProgram({ p }: { p: Program }) {
         {s.hareketler.map((h, i) => (
           <View key={`${h.id}-${i}`} style={st.hareket}>
             <Karo kaynak={kapakGorseli(h.id)} boyut={58} />
-            <Sayi deger={`0${i + 1}`} boyut={22} renk={Renk.soluk} style={{ width: 30 }} />
+            <Sayi deger={String(i + 1).padStart(2, '0')} boyut={22} renk={Renk.soluk} style={{ width: 30 }} />
             <View style={{ flex: 1 }}>
               <M tur="normal" style={{ fontFamily: Yazi.orta }}>
                 {h.ad}
@@ -85,7 +86,7 @@ function UzunProgram({ p }: { p: Program }) {
 
   if (p.yakinda || !gunler.length) {
     return (
-      <Ekran>
+      <Ekran baslikli>
         <Ust p={p} />
         <Kart>
           <M>Bu program hazırlanıyor.</M>
@@ -98,7 +99,7 @@ function UzunProgram({ p }: { p: Program }) {
   const tamamSayisi = il ? Object.keys(il.tamam).length : 0;
 
   return (
-    <Ekran>
+    <Ekran baslikli>
       <Ust p={p} />
 
       {p.hareket ? (
@@ -145,9 +146,16 @@ function UzunProgram({ p }: { p: Program }) {
                 Bugünkü hedef: {miktar(bugun.hedef)}. {sn ? 'Kaç saniye tuttun?' : 'Kaç tane yaptın?'}
               </M>
               <View style={st.sayac}>
-                <SayacDugme metin="−" onPress={() => setTekrar(Math.max(0, deger - adim))} />
-                <Text style={st.sayacYazi}>{deger}</Text>
-                <SayacDugme metin="+" onPress={() => setTekrar(deger + adim)} />
+                <YuvarlakDugme
+                  simge="eksi"
+                  etiket={`Azalt, ${adim}`}
+                  disabled={deger <= 0}
+                  onPress={() => setTekrar(Math.max(0, deger - adim))}
+                />
+                <Text style={st.sayacYazi} accessibilityLiveRegion="polite">
+                  {deger}
+                </Text>
+                <YuvarlakDugme simge="arti" etiket={`Artır, ${adim}`} onPress={() => setTekrar(deger + adim)} />
               </View>
               <Dugme
                 metin="Kaydet"
@@ -211,34 +219,32 @@ function sureAraligi(hareketler: { sure: number }[]) {
   return en === ek ? `${en}` : `${en}–${ek}`;
 }
 
-function SayacDugme({ metin, onPress }: { metin: string; onPress: () => void }) {
-  const st = useSt();
-  return (
-    <Pressable onPress={onPress} style={st.sayacDugme} hitSlop={6}>
-      <Text style={st.sayacDugmeYazi}>{metin}</Text>
-    </Pressable>
-  );
-}
-
 function Rehber({ p }: { p: Program }) {
   const Renk = useRenk();
   const st = useSt();
   const [acik, setAcik] = useState(0);
   return (
-    <Ekran>
+    <Ekran baslikli>
       <Ust p={p} />
       {p.bolumler?.map((b, i) => (
-        <Pressable key={b.baslik} onPress={() => setAcik(acik === i ? -1 : i)}>
-          <Kart vurgulu={acik === i}>
-            <View style={st.hareket}>
-              <Sayi deger={`0${i + 1}`} boyut={22} renk={acik === i ? Renk.volt : Renk.soluk} style={{ width: 30 }} />
-              <M tur="buyuk" style={{ flex: 1 }}>
-                {b.baslik}
-              </M>
-            </View>
-            {acik === i ? <M tur="normal">{b.metin}</M> : null}
-          </Kart>
-        </Pressable>
+        <KartDugme
+          key={b.baslik}
+          vurgulu={acik === i}
+          onPress={() => setAcik(acik === i ? -1 : i)}
+          accessibilityLabel={b.baslik}
+          accessibilityState={{ expanded: acik === i }}>
+          <View style={st.hareket}>
+            <Sayi deger={String(i + 1).padStart(2, '0')} boyut={22} renk={acik === i ? Renk.volt : Renk.soluk} style={{ width: 30 }} />
+            <M tur="buyuk" style={{ flex: 1 }}>
+              {b.baslik}
+            </M>
+          </View>
+          {acik === i ? (
+            <Animated.View entering={FadeIn.duration(200)}>
+              <M tur="normal">{b.metin}</M>
+            </Animated.View>
+          ) : null}
+        </KartDugme>
       ))}
     </Ekran>
   );
@@ -248,9 +254,7 @@ const useSt = stil((Renk) => ({
   hareket: { flexDirection: 'row', alignItems: 'center', gap: Bosluk.m },
   gorseller: { flexDirection: 'row', gap: Bosluk.m, justifyContent: 'center' },
   sayac: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Bosluk.xl, marginVertical: Bosluk.s },
-  sayacYazi: { fontFamily: Yazi.baslik, color: Renk.kemik, fontSize: 56, lineHeight: 72, minWidth: 90, textAlign: 'center' },
-  sayacDugme: { width: 52, height: 52, borderRadius: 26, backgroundColor: Renk.gece3, alignItems: 'center', justifyContent: 'center' },
-  sayacDugmeYazi: { color: Renk.kemik, fontSize: 28, fontFamily: Yazi.kalin, marginTop: -2 },
+  sayacYazi: { fontFamily: Yazi.baslik, color: Renk.kemik, fontSize: 56, lineHeight: 72, minWidth: 90, textAlign: 'center', includeFontPadding: false },
   izgara: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   gun: {
     width: '18.2%',
@@ -261,5 +265,5 @@ const useSt = stil((Renk) => ({
     justifyContent: 'center',
   },
   gunNo: { fontFamily: Yazi.kalin, color: Renk.soluk, fontSize: 11 },
-  gunHedef: { fontFamily: Yazi.baslik, color: Renk.kemik, fontSize: 16, lineHeight: 22 },
+  gunHedef: { fontFamily: Yazi.baslik, color: Renk.kemik, fontSize: 16, lineHeight: 22, includeFontPadding: false },
 }));

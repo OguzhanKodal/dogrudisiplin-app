@@ -1,6 +1,6 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
-import { IsaretKare } from '@/components/ui';
+import { Basilabilir, IsaretKare } from '@/components/ui';
 import { Bosluk, Yazi } from '@/constants/theme';
 import { tik } from '@/lib/ses';
 import { gunAnahtari } from '@/lib/tarih';
@@ -15,9 +15,10 @@ export function AliskanlikSatiri({ a, gun = gunAnahtari(), son }: { a: Aliskanli
   const isaretle = useVeri((s) => s.isaretle);
 
   return (
-    <Pressable
+    <Basilabilir
       accessibilityRole="checkbox"
-      accessibilityState={{ checked: !!isaret }}
+      accessibilityLabel={a.ad}
+      accessibilityState={{ checked: isaret === 'tam' ? true : isaret === 'kucuk' ? 'mixed' : false }}
       accessibilityHint="Basılı tutarsan küçük hâlini yaptın sayılır"
       onPress={() => {
         tik();
@@ -27,14 +28,15 @@ export function AliskanlikSatiri({ a, gun = gunAnahtari(), son }: { a: Aliskanli
         tik(true);
         isaretle(a.id, 'kucuk', gun);
       }}
-      style={({ pressed }) => [st.satir, !son && st.cizgi, pressed && { opacity: 0.7 }]}>
+      olcek={false}
+      style={[st.satir, !son && st.cizgi]}>
       <IsaretKare durum={isaret} boyut={28} tikli />
       <View style={{ flex: 1 }}>
         <Text style={[st.ad, isaret && { color: Renk.soluk }]}>{a.ad}</Text>
         <Text style={st.kucuk}>{isaret === 'kucuk' ? `Küçük hâli yapıldı · ${a.kucuk}` : `Küçük hâli: ${a.kucuk}`}</Text>
       </View>
       <Text style={st.simge}>{a.simge}</Text>
-    </Pressable>
+    </Basilabilir>
   );
 }
 

@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
 import { kapakGorseli, Karo } from '@/components/hareket-gorseli';
-import { Baslik, Bolum, Ekran, M, Sayi } from '@/components/ui';
-import { Bosluk, Kose, Yazi } from '@/constants/theme';
+import { Simge } from '@/components/simge';
+import { Baslik, Bolum, Ekran, KartDugme, M, Sayi } from '@/components/ui';
+import { Bosluk, Yazi } from '@/constants/theme';
 import { PROGRAMLAR, type Program } from '@/data/programlar';
 import { stil, useRenk } from '@/lib/tema';
 
@@ -32,18 +33,25 @@ function ProgramKarti({ p }: { p: Program }) {
   const Renk = useRenk();
   const st = useSt();
   const kapak = p.kapak ? kapakGorseli(p.kapak) : undefined;
+  // Kapak çizimi yoksa: hareket / gün / bölüm sayısı.
+  const [sayi, birim] = p.seans
+    ? [p.seans.hareketler.length, 'hareket']
+    : p.gunler
+      ? [p.gunler.length, 'gün']
+      : [p.bolumler?.length, 'bölüm'];
   return (
-    <Pressable
+    <KartDugme
       disabled={p.yakinda}
       onPress={() => router.push(`/program/${p.id}`)}
-      style={({ pressed }) => [st.kart, pressed && { opacity: 0.85 }, p.yakinda && { opacity: 0.55 }]}>
+      accessibilityLabel={`${p.ad}. ${p.altBaslik}. ${p.sure}, ${p.seviye}${p.yakinda ? '. Yakında' : ''}`}
+      style={st.kart}>
       {kapak ? (
         <Karo kaynak={kapak} boyut={84} />
       ) : (
         <View style={st.yerKaro}>
-          <Sayi deger={p.bolumler?.length ?? '—'} boyut={34} />
+          <Sayi deger={sayi ?? '—'} boyut={34} />
           <M tur="etiket" style={{ fontSize: 9 }}>
-            bölüm
+            {birim}
           </M>
         </View>
       )}
@@ -56,25 +64,13 @@ function ProgramKarti({ p }: { p: Program }) {
           {p.yakinda ? <M style={[st.etiket, { color: Renk.voltUstu, backgroundColor: Renk.volt }]}>Yakında</M> : null}
         </View>
       </View>
-      <M tur="buyuk" renk={Renk.soluk}>
-        ›
-      </M>
-    </Pressable>
+      {p.yakinda ? null : <Simge ad="sag" boyut={18} renk={Renk.soluk} />}
+    </KartDugme>
   );
 }
 
 const useSt = stil((Renk) => ({
-  kart: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Bosluk.m,
-    backgroundColor: Renk.gece2,
-    borderRadius: Kose.l,
-    borderWidth: 1,
-    borderColor: Renk.cizgi,
-    padding: Bosluk.m,
-    paddingRight: Bosluk.l,
-  },
+  kart: { flexDirection: 'row', alignItems: 'center', gap: Bosluk.m, padding: Bosluk.m, paddingRight: Bosluk.l },
   yerKaro: {
     width: 84,
     height: 84,

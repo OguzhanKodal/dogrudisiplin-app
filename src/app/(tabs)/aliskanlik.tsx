@@ -1,12 +1,15 @@
 import { router } from 'expo-router';
 import { Alert, Pressable, Text, View } from 'react-native';
+import { useShallow } from 'zustand/react/shallow';
 
-import { Baslik, Dugme, Ekran, IsaretKare, Kart, M, Sayi } from '@/components/ui';
+import { Basilabilir, Baslik, Dugme, Ekran, IsaretKare, Kart, M, Sayi, YuvarlakDugme } from '@/components/ui';
 import { Bosluk, Yazi } from '@/constants/theme';
 import { tik } from '@/lib/ses';
 import { buHafta, gunAnahtari, KISA_GUNLER } from '@/lib/tarih';
 import { toplamGun, useVeri, type Aliskanlik } from '@/store';
 import { stil, useRenk } from '@/lib/tema';
+
+const GUN_ADLARI = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
 
 export default function Aliskanliklar() {
   const st = useSt();
@@ -16,9 +19,7 @@ export default function Aliskanliklar() {
     <Ekran>
       <View style={st.ust}>
         <Baslik metin="Alışkanlıklar" boyut={34} />
-        <Pressable onPress={() => router.push('/aliskanlik-ekle')} hitSlop={10} accessibilityRole="button" style={st.ekle}>
-          <Text style={st.ekleYazi}>+</Text>
-        </Pressable>
+        <YuvarlakDugme simge="arti" tur="ana" boyut={40} etiket="Alışkanlık ekle" onPress={() => router.push('/aliskanlik-ekle')} />
       </View>
       <View style={st.aciklama}>
         <View style={st.aciklamaSatir}>
@@ -46,18 +47,21 @@ export default function Aliskanliklar() {
 function HaftaKarti({ a }: { a: Aliskanlik }) {
   const Renk = useRenk();
   const st = useSt();
-  const isaretler = useVeri((s) => s.isaretler);
+  const hafta = buHafta();
+  // Yalnız bu alışkanlığın bu haftası ve toplamı izlenir: başka bir kartta işaretleme bu kartı yeniden çizmez.
+  const haftaIsaret = useVeri(useShallow((s) => hafta.map((g) => s.isaretler[g]?.[a.id])));
+  const toplam = useVeri((s) => toplamGun(s.isaretler, a.id));
   const isaretle = useVeri((s) => s.isaretle);
   const sil = useVeri((s) => s.aliskanlikSil);
-  const hafta = buHafta();
   const bugun = gunAnahtari();
-  const buHaftaYapilan = hafta.filter((g) => isaretler[g]?.[a.id]).length;
+  const buHaftaYapilan = haftaIsaret.filter(Boolean).length;
   const hedefTamam = buHaftaYapilan >= a.haftalikHedef;
 
   return (
     <Kart style={{ gap: Bosluk.m }}>
       <Pressable
         style={st.baslikSatir}
+        accessibilityHint="Silmek için basılı tut"
         onLongPress={() =>
           Alert.alert(a.ad, 'Bu alışkanlığı silmek istiyor musun? Geçmiş kayıtları da gider.', [
             { text: 'Vazgeç', style: 'cancel' },
@@ -71,7 +75,7 @@ function HaftaKarti({ a }: { a: Aliskanlik }) {
           <M tur="kucuk">Küçük hâli: {a.kucuk}</M>
         </View>
         <View style={{ alignItems: 'flex-end' }}>
-          <Sayi deger={toplamGun(isaretler, a.id)} boyut={30} renk={Renk.kemik} />
+          <Sayi deger={toplam} boyut={30} renk={Renk.kemik} />
           <M tur="etiket" style={{ fontSize: 9, marginTop: -4 }}>
             toplam gün
           </M>
@@ -79,12 +83,18 @@ function HaftaKarti({ a }: { a: Aliskanlik }) {
       </Pressable>
       <View style={st.hafta}>
         {hafta.map((g, i) => {
-          const isaret = isaretler[g]?.[a.id];
+          const isaret = haftaIsaret[i];
           const gelecek = g > bugun;
           return (
-            <Pressable
+            <Basilabilir
               key={g}
+              sinirsiz
               disabled={gelecek}
+              accessibilityRole="checkbox"
+              accessibilityLabel={GUN_ADLARI[i]}
+              accessibilityState={{ checked: isaret === 'tam' ? true : isaret === 'kucuk' ? 'mixed' : false, disabled: gelecek }}
+              accessibilityHint="Basılı tutarsan küçük hâli sayılır"
+              hitSlop={{ left: 4, right: 4 }}
               onPress={() => {
                 tik();
                 isaretle(a.id, isaret ? null : 'tam', g);
@@ -93,10 +103,11 @@ function HaftaKarti({ a }: { a: Aliskanlik }) {
                 tik(true);
                 isaretle(a.id, 'kucuk', g);
               }}
+              pasifSoluk={false}
               style={st.gun}>
               <IsaretKare durum={isaret} boyut={36} kose={10} bugun={g === bugun} gelecek={gelecek} />
               <Text style={[st.gunAd, g === bugun && { color: Renk.vurgu }]}>{KISA_GUNLER[i]}</Text>
-            </Pressable>
+            </Basilabilir>
           );
         })}
       </View>
@@ -110,8 +121,6 @@ function HaftaKarti({ a }: { a: Aliskanlik }) {
 
 const useSt = stil((Renk) => ({
   ust: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  ekle: { width: 40, height: 40, borderRadius: 20, backgroundColor: Renk.volt, alignItems: 'center', justifyContent: 'center' },
-  ekleYazi: { fontFamily: Yazi.kalin, color: Renk.voltUstu, fontSize: 24, lineHeight: 28 },
   aciklama: { gap: 6, marginTop: -Bosluk.s },
   aciklamaSatir: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   baslikSatir: { flexDirection: 'row', alignItems: 'center', gap: Bosluk.m },

@@ -17,11 +17,17 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#C8F031",
-        "foregroundImage": "./assets/images/icon.png"
+        "backgroundColor": "#CAF139",
+        "foregroundImage": "./assets/images/adaptive-icon.png"
       },
       "package": "com.kodal.dogrudisiplin",
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "softwareKeyboardLayoutMode": "resize",
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "output": "single",
@@ -37,9 +43,24 @@
           "imageWidth": 120
         }
       ],
-      "expo-audio",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "enableBackgroundPlayback": false
+        }
+      ],
       "expo-sqlite",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-navigation-bar",
+        {
+          "enforceContrast": false
+        }
+      ],
+      "expo-asset",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true,

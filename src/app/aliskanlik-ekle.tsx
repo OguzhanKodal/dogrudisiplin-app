@@ -1,9 +1,9 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ScrollView, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Bolum, Dugme, Kart, M } from '@/components/ui';
+import { Basilabilir, Bolum, Dugme, Kart, M, SecimGrubu } from '@/components/ui';
 import { Bosluk, Kose, Yazi } from '@/constants/theme';
 import { PAKETLER } from '@/data/aliskanlik-paketleri';
 import { basari } from '@/lib/ses';
@@ -11,6 +11,7 @@ import { useVeri } from '@/store';
 import { stil, useRenk } from '@/lib/tema';
 
 const SIMGELER = ['💪', '📖', '💧', '📵', '🧘', '🏃', '🛏️', '✍️', '🥗', '🚫', '🔥', '👟'];
+const HEDEFLER = [3, 4, 5, 6, 7].map((n) => ({ deger: n, ad: String(n), okunus: `Haftada ${n} gün` }));
 
 export default function AliskanlikEkle() {
   const Renk = useRenk();
@@ -62,23 +63,21 @@ export default function AliskanlikEkle() {
           maxLength={40}
         />
         <M tur="kucuk">Küçük hâli, canının istemediği gün için. Onu yapan da o günü kazanır.</M>
-        <View style={st.simgeler}>
+        <View style={st.simgeler} accessibilityRole="radiogroup" accessibilityLabel="Simge">
           {SIMGELER.map((s) => (
-            <Pressable key={s} onPress={() => setSimge(s)} style={[st.simge, simge === s && st.simgeSecili]}>
-              <Text style={{ fontSize: 22 }}>{s}</Text>
-            </Pressable>
+            <Basilabilir
+              key={s}
+              onPress={() => setSimge(s)}
+              accessibilityRole="radio"
+              accessibilityLabel={s}
+              accessibilityState={{ checked: simge === s, selected: simge === s }}
+              style={[st.simge, simge === s && st.simgeSecili]}>
+              <Text style={st.simgeYazi}>{s}</Text>
+            </Basilabilir>
           ))}
         </View>
-        <View style={st.hedefSatir}>
-          <M tur="normal">Haftada kaç gün?</M>
-          <View style={st.hedefler}>
-            {[3, 4, 5, 6, 7].map((n) => (
-              <Pressable key={n} onPress={() => setHedef(n)} style={[st.hedef, hedef === n && st.hedefSecili]}>
-                <Text style={[st.hedefYazi, hedef === n && { color: Renk.voltUstu }]}>{n}</Text>
-              </Pressable>
-            ))}
-          </View>
-        </View>
+        <M tur="normal">Haftada kaç gün?</M>
+        <SecimGrubu etiket="Haftada kaç gün" secenekler={HEDEFLER} secili={hedef} sec={setHedef} />
         <Dugme metin="Ekle" disabled={ad.trim().length < 2} onPress={kaydet} />
       </Bolum>
 
@@ -108,20 +107,18 @@ const useSt = stil((Renk) => ({
     color: Renk.kemik,
     fontFamily: Yazi.normal,
     fontSize: 16,
+    minHeight: 56,
+    includeFontPadding: false,
   },
   simgeler: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   simge: {
-    width: 46,
-    height: 46,
+    width: 48,
+    height: 48,
     borderRadius: 12,
     backgroundColor: Renk.gece2,
     alignItems: 'center',
     justifyContent: 'center',
   },
   simgeSecili: { borderWidth: 2, borderColor: Renk.volt },
-  hedefSatir: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  hedefler: { flexDirection: 'row', gap: 6 },
-  hedef: { width: 36, height: 36, borderRadius: 18, backgroundColor: Renk.gece2, alignItems: 'center', justifyContent: 'center' },
-  hedefSecili: { backgroundColor: Renk.volt },
-  hedefYazi: { fontFamily: Yazi.kalin, color: Renk.kemik, fontSize: 14 },
+  simgeYazi: { fontSize: 22, lineHeight: 28, includeFontPadding: false },
 }));

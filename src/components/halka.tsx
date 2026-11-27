@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import Animated, { cancelAnimation, Easing, useAnimatedProps, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { cancelAnimation, Easing, ReduceMotion, useAnimatedProps, useSharedValue, withTiming } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
 
 import { Yazi } from '@/constants/theme';
@@ -45,7 +45,8 @@ export function Halka({
     cancelAnimation(oran);
     oran.value = simdi;
     if (oynuyor && kalan > 0) {
-      oran.value = withTiming(0, { duration: kalan * 1000, easing: Easing.linear });
+      // Süre bilgisi taşır: azaltılmış harekette de akar (ReduceMotion.System olsaydı halka anında boşalırdı).
+      oran.value = withTiming(0, { duration: kalan * 1000, easing: Easing.linear, reduceMotion: ReduceMotion.Never });
     }
     // kalan bilerek bağımlılık değil: her saniye yeniden başlatmak takılmaya yol açar.
   }, [anahtar, oynuyor, toplam]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -76,6 +77,6 @@ export function Halka({
 }
 
 const useSt = stil((Renk) => ({
-  sayi: { fontFamily: Yazi.baslik, textAlign: 'center' },
+  sayi: { fontFamily: Yazi.baslik, textAlign: 'center', includeFontPadding: false },
   alt: { fontFamily: Yazi.kalin, color: Renk.soluk, fontSize: 12, letterSpacing: 1.2, marginTop: -6 },
 }));

@@ -1,5 +1,6 @@
 // Tüm kullanıcı verisi cihazda tutulur (hesap yok, internet gerekmez).
 import Storage from 'expo-sqlite/kv-store';
+import { Platform } from 'react-native';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -120,8 +121,10 @@ export const useVeri = create<Durum>()(
     {
       name: 'dogrudisiplin-veri',
       version: 1,
+      // Okuma senkron: depo daha ilk karede dolu gelir (boş sayaç / yanlış tema sıçraması olmaz).
+      // Yazma asenkron: işaretleme JS thread'ini bekletmez.
       storage: createJSONStorage(() => ({
-        getItem: (k) => Storage.getItemAsync(k),
+        getItem: (k) => (Platform.OS === 'web' ? Storage.getItemAsync(k) : Storage.getItemSync(k)),
         setItem: (k, v) => Storage.setItemAsync(k, v),
         removeItem: async (k) => {
           await Storage.removeItemAsync(k);

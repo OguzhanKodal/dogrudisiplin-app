@@ -1,11 +1,12 @@
 import { Image } from 'expo-image';
 import { Link, router } from 'expo-router';
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { AliskanlikSatiri } from '@/components/aliskanlik-satiri';
 import { kapakGorseli, Karo } from '@/components/hareket-gorseli';
-import { Baslik, Bolum, Cubuk, Dugme, Ekran, IsaretKare, Kart, M, Sayi } from '@/components/ui';
+import { Simge } from '@/components/simge';
+import { Basilabilir, Baslik, Bolum, Cubuk, Dugme, Ekran, IsaretKare, Kart, KartDugme, M, MetinDugme, Sayi } from '@/components/ui';
 import { Bosluk, Kose, Yazi } from '@/constants/theme';
 import { programBul } from '@/data/programlar';
 import { buHafta, gunAnahtari, KISA_GUNLER, uzunTarih } from '@/lib/tarih';
@@ -43,9 +44,9 @@ export default function Bugun() {
       <View style={st.ust}>
         <M tur="etiket">{uzunTarih()}</M>
         <Link href="/hakkinda" asChild>
-          <Pressable accessibilityLabel="Ayarlar" hitSlop={10}>
-            <Image source={require('@/assets/images/icon.png')} style={st.avatar} />
-          </Pressable>
+          <Basilabilir accessibilityLabel="Ayarlar" hitSlop={5} style={st.avatar}>
+            <Image source={require('@/assets/images/ikon-kucuk.png')} style={st.avatar} />
+          </Basilabilir>
         </Link>
       </View>
 
@@ -69,8 +70,11 @@ export default function Bugun() {
       </View>
 
       {/* Bugünün antrenmanı */}
-      <Pressable onPress={() => router.push('/oynatici/sabah-5')} style={({ pressed }) => pressed && { opacity: 0.9 }}>
-        <Kart vurgulu={!bugunAntrenman} style={{ gap: Bosluk.m }}>
+      <KartDugme
+        onPress={() => router.push('/oynatici/sabah-5')}
+        accessibilityLabel={bugunAntrenman ? 'Sabah 5 dakika, bugün bitti. Yeniden başlat' : 'Sabah 5 dakika antrenmanını başlat'}
+        vurgulu={!bugunAntrenman}
+        style={{ gap: Bosluk.m }}>
           <View style={st.seri}>
             {sabah.seans!.hareketler.slice(0, 4).map((h, i) => (
               <View key={h.id} style={{ flex: 1 }}>
@@ -91,16 +95,14 @@ export default function Bugun() {
                 <M tur="kucuk">8 hareket · ekipmansız · sesli</M>
               </View>
               <View style={[st.oyna, bugunAntrenman && { backgroundColor: Renk.gece3 }]}>
-                <Text style={[st.oynaYazi, bugunAntrenman && { color: Renk.kemik }]}>{bugunAntrenman ? '↻' : '▶'}</Text>
+                <Simge ad={bugunAntrenman ? 'yenile' : 'oyna'} boyut={22} renk={bugunAntrenman ? Renk.kemik : Renk.voltUstu} />
               </View>
             </View>
           </View>
-        </Kart>
-      </Pressable>
+      </KartDugme>
 
       {/* 30 gün şınav */}
-      <Pressable onPress={() => router.push('/program/sinav-30')} style={({ pressed }) => pressed && { opacity: 0.9 }}>
-        <Kart style={st.uzunKart}>
+      <KartDugme onPress={() => router.push('/program/sinav-30')} accessibilityLabel="30 gün şınav programı" style={st.uzunKart}>
           <Karo kaynak={kapakGorseli('sinav')} boyut={64} />
           <View style={{ flex: 1, gap: 4 }}>
             <View style={st.satir}>
@@ -118,18 +120,13 @@ export default function Bugun() {
             </M>
             {sinavIl ? <Cubuk oran={Object.keys(sinavIl.tamam).length / 30} /> : null}
           </View>
-        </Kart>
-      </Pressable>
+      </KartDugme>
 
       <Bolum
         baslik={aliskanliklar.length ? `Alışkanlıklar · ${yapilan}/${aliskanliklar.length}` : 'Alışkanlıklar'}
         sag={
           <Link href="/aliskanlik-ekle" asChild>
-            <Pressable hitSlop={10}>
-              <M tur="etiket" renk={Renk.vurgu}>
-                + Ekle
-              </M>
-            </Pressable>
+            <MetinDugme metin="+ Ekle" accessibilityLabel="Alışkanlık ekle" />
           </Link>
         }>
         {aliskanliklar.length === 0 ? (
@@ -177,6 +174,5 @@ const useSt = stil((Renk) => ({
   seriNo: { position: 'absolute', left: 6, top: 2 },
   satir: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: Bosluk.m },
   oyna: { width: 50, height: 50, borderRadius: 25, backgroundColor: Renk.volt, alignItems: 'center', justifyContent: 'center' },
-  oynaYazi: { color: Renk.voltUstu, fontSize: 18, marginLeft: 3 },
   uzunKart: { flexDirection: 'row', alignItems: 'center', gap: Bosluk.m, padding: Bosluk.m },
 }));
