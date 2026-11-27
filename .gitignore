@@ -44,3 +44,6 @@ example
 
 # Wear OS modülünün derleme çıktısı
 /wear/build
+/modules/*/android/build
+# apple-targets bunları expo-target.config.js'ten her prebuild'de üretir
+/targets/*/Assets.xcassets
